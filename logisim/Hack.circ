@@ -23,6 +23,7 @@
   <lib desc="#Input/Output-Extra" name="10"/>
   <lib desc="#Soc" name="11"/>
   <lib desc="#HDL-IP" name="12"/>
+  <lib desc="jar#lib\logisimn2t-1.0.jar#com.github.itoshkov.logisimn2t.Components" name="13"/>
   <main name="main"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
@@ -610,12 +611,6 @@
       <a name="label" val="y"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(1060,440)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="north"/>
-      <a name="label" val="ng"/>
-      <a name="output" val="true"/>
-    </comp>
     <comp lib="0" loc="(150,130)" name="Constant">
       <a name="value" val="0x0"/>
       <a name="width" val="16"/>
@@ -660,30 +655,22 @@
       <a name="facing" val="south"/>
       <a name="label" val="no"/>
     </comp>
-    <comp lib="0" loc="(550,410)" name="Probe">
-      <a name="appearance" val="classic"/>
-    </comp>
-    <comp lib="0" loc="(630,250)" name="Constant">
-      <a name="facing" val="south"/>
-      <a name="value" val="0xffff"/>
+    <comp lib="0" loc="(660,340)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="readyOut"/>
+      <a name="labelfont" val="SansSerif bold 12"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(740,100)" name="Probe">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
     </comp>
-    <comp lib="0" loc="(820,440)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="north"/>
-      <a name="label" val="zr"/>
-      <a name="output" val="true"/>
-    </comp>
-    <comp lib="0" loc="(850,570)" name="Probe">
+    <comp lib="0" loc="(800,240)" name="Probe">
       <a name="appearance" val="classic"/>
     </comp>
-    <comp lib="0" loc="(870,250)" name="Constant">
-      <a name="facing" val="south"/>
-      <a name="value" val="0x8000"/>
+    <comp lib="0" loc="(890,240)" name="Tunnel">
+      <a name="label" val="readyOut"/>
+      <a name="labelfont" val="SansSerif bold 12"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(910,180)" name="Pin">
@@ -692,6 +679,38 @@
       <a name="label" val="outPin"/>
       <a name="output" val="true"/>
       <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(920,340)" name="Splitter">
+      <a name="appear" val="center"/>
+      <a name="bit0" val="none"/>
+      <a name="bit1" val="none"/>
+      <a name="bit10" val="none"/>
+      <a name="bit11" val="none"/>
+      <a name="bit12" val="none"/>
+      <a name="bit13" val="none"/>
+      <a name="bit14" val="none"/>
+      <a name="bit15" val="0"/>
+      <a name="bit2" val="none"/>
+      <a name="bit3" val="none"/>
+      <a name="bit4" val="none"/>
+      <a name="bit5" val="none"/>
+      <a name="bit6" val="none"/>
+      <a name="bit7" val="none"/>
+      <a name="bit8" val="none"/>
+      <a name="bit9" val="none"/>
+      <a name="incoming" val="16"/>
+    </comp>
+    <comp lib="0" loc="(930,460)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="zr"/>
+      <a name="output" val="true"/>
+    </comp>
+    <comp lib="0" loc="(960,460)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="north"/>
+      <a name="label" val="ng"/>
+      <a name="output" val="true"/>
     </comp>
     <comp lib="1" loc="(240,140)" name="NOT Gate">
       <a name="width" val="16"/>
@@ -702,19 +721,11 @@
     <comp lib="1" loc="(610,150)" name="AND Gate">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(650,330)" name="AND Gate">
-      <a name="facing" val="south"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="1" loc="(790,190)" name="NOT Gate">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(820,430)" name="NOT Gate">
+    <comp lib="1" loc="(930,450)" name="NOT Gate">
       <a name="facing" val="south"/>
-    </comp>
-    <comp lib="1" loc="(890,330)" name="AND Gate">
-      <a name="facing" val="south"/>
-      <a name="width" val="16"/>
     </comp>
     <comp lib="2" loc="(190,120)" name="Multiplexer">
       <a name="width" val="16"/>
@@ -734,16 +745,12 @@
     <comp lib="2" loc="(830,180)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
-    <comp loc="(1120,350)" name="Or16Way"/>
     <comp loc="(610,200)" name="Add16"/>
-    <comp loc="(880,350)" name="Or16Way"/>
+    <comp loc="(920,410)" name="Or16Way"/>
     <wire from="(100,200)" to="(110,200)"/>
     <wire from="(100,270)" to="(160,270)"/>
-    <wire from="(1060,390)" to="(1060,440)"/>
-    <wire from="(1060,390)" to="(1120,390)"/>
     <wire from="(110,110)" to="(110,200)"/>
     <wire from="(110,110)" to="(160,110)"/>
-    <wire from="(1120,350)" to="(1120,390)"/>
     <wire from="(150,130)" to="(160,130)"/>
     <wire from="(150,290)" to="(160,290)"/>
     <wire from="(170,140)" to="(170,160)"/>
@@ -793,21 +800,17 @@
     <wire from="(470,90)" to="(710,90)"/>
     <wire from="(500,50)" to="(500,70)"/>
     <wire from="(500,70)" to="(840,70)"/>
-    <wire from="(550,410)" to="(650,410)"/>
     <wire from="(610,150)" to="(640,150)"/>
     <wire from="(610,200)" to="(640,200)"/>
-    <wire from="(630,250)" to="(630,280)"/>
     <wire from="(640,150)" to="(640,170)"/>
     <wire from="(640,170)" to="(660,170)"/>
     <wire from="(640,190)" to="(640,200)"/>
     <wire from="(640,190)" to="(660,190)"/>
-    <wire from="(650,330)" to="(650,350)"/>
-    <wire from="(650,350)" to="(650,410)"/>
-    <wire from="(650,350)" to="(660,350)"/>
+    <wire from="(660,340)" to="(700,340)"/>
     <wire from="(670,200)" to="(710,200)"/>
-    <wire from="(670,220)" to="(670,280)"/>
-    <wire from="(670,220)" to="(850,220)"/>
     <wire from="(690,180)" to="(720,180)"/>
+    <wire from="(700,340)" to="(700,410)"/>
+    <wire from="(700,340)" to="(920,340)"/>
     <wire from="(710,90)" to="(710,200)"/>
     <wire from="(720,100)" to="(720,180)"/>
     <wire from="(720,100)" to="(740,100)"/>
@@ -817,22 +820,18 @@
     <wire from="(730,180)" to="(730,190)"/>
     <wire from="(730,190)" to="(760,190)"/>
     <wire from="(790,190)" to="(800,190)"/>
+    <wire from="(800,240)" to="(880,240)"/>
     <wire from="(810,200)" to="(840,200)"/>
-    <wire from="(820,390)" to="(820,400)"/>
-    <wire from="(820,390)" to="(880,390)"/>
-    <wire from="(820,430)" to="(820,440)"/>
-    <wire from="(830,180)" to="(850,180)"/>
+    <wire from="(830,180)" to="(880,180)"/>
     <wire from="(840,70)" to="(840,200)"/>
-    <wire from="(850,180)" to="(850,220)"/>
-    <wire from="(850,180)" to="(910,180)"/>
-    <wire from="(850,220)" to="(910,220)"/>
-    <wire from="(850,570)" to="(890,570)"/>
-    <wire from="(870,250)" to="(870,280)"/>
-    <wire from="(880,350)" to="(880,390)"/>
-    <wire from="(890,330)" to="(890,350)"/>
-    <wire from="(890,350)" to="(890,570)"/>
-    <wire from="(890,350)" to="(900,350)"/>
-    <wire from="(910,220)" to="(910,280)"/>
+    <wire from="(880,180)" to="(880,240)"/>
+    <wire from="(880,180)" to="(910,180)"/>
+    <wire from="(880,240)" to="(890,240)"/>
+    <wire from="(920,410)" to="(930,410)"/>
+    <wire from="(930,410)" to="(930,420)"/>
+    <wire from="(930,450)" to="(930,460)"/>
+    <wire from="(940,330)" to="(960,330)"/>
+    <wire from="(960,330)" to="(960,460)"/>
   </circuit>
   <circuit name="DMux8Way">
     <a name="appearance" val="logisim_evolution"/>
