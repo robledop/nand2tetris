@@ -1,0 +1,6 @@
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\Add.asm
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\HackAssembler.exe
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\HackAssembler.dll
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\HackAssembler.deps.json
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\HackAssembler.runtimeconfig.json
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\HackAssembler.pdb

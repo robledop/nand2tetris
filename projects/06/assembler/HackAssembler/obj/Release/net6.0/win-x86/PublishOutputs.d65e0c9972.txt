@@ -1,0 +1,3 @@
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\win-x86\HackAssembler.pdb
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\win-x86\Add.asm
+C:\nand2tetris\projects\06\assembler\HackAssembler\bin\Release\net6.0\publish\win-x86\HackAssembler.exe
