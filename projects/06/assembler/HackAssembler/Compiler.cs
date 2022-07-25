@@ -85,8 +85,8 @@ public static class Compiler
         {"THAT", "4"},
     };
 
-    static readonly Dictionary<string, string> _labels = new();
-    static Dictionary<string, string> _variables = new();
+    static readonly Dictionary<string, string> Labels = new();
+    static readonly Dictionary<string, string> Variables = new();
 
     public static List<string> Compile(List<string> linesOfCode)
     {
@@ -113,26 +113,23 @@ public static class Compiler
                         var argumentNumber = Convert.ToInt32(PreDefinedSymbols[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
-                    else if (_labels.ContainsKey(argument))
+                    else if (Labels.ContainsKey(argument))
                     {
-                        var argumentNumber = Convert.ToInt32(_labels[argument]);
+                        var argumentNumber = Convert.ToInt32(Labels[argument]);
+                        binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
+                    }
+                    else if (Variables.ContainsKey(argument))
+                    {
+                        var argumentNumber = Convert.ToInt32(Variables[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else
                     {
-                        if (_variables.ContainsKey(argument))
-                        {
-                            var argumentNumber = Convert.ToInt32(_variables[argument]);
-                            binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
-                        }
-                        else
-                        {
-                            var variablePos = VARIABLE_START_POS + _variables.Count;
-                            _variables.Add(argument, variablePos.ToString());
+                        var variablePos = VARIABLE_START_POS + Variables.Count;
+                        Variables.Add(argument, variablePos.ToString());
 
-                            var argumentNumber = Convert.ToInt32(_variables[argument]);
-                            binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
-                        }
+                        var argumentNumber = Convert.ToInt32(Variables[argument]);
+                        binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                 }
             }
@@ -193,7 +190,7 @@ public static class Compiler
             if (line.StartsWith('('))
             {
                 var label = line.Split('(', ')')[1];
-                _labels.Add(label, (lineNumber).ToString());
+                Labels.Add(label, (lineNumber).ToString());
             }
             else
             {
