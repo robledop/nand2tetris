@@ -1403,6 +1403,8 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
+    <a name="downloadBoard" val="BASYS3"/>
+    <a name="downloadFrequency" val="2083333.3333333333"/>
     <a name="simulationFrequency" val="1.0"/>
     <comp loc="(580,220)" name="CPU"/>
   </circuit>

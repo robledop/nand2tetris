@@ -2,7 +2,7 @@
 
 public static class Compiler
 {
-    static readonly Dictionary<string, string> Comp = new()
+    static readonly Dictionary<string, string> Computation = new()
     {
         {"0", "0101010"},
         {"1", "0111111"},
@@ -34,7 +34,7 @@ public static class Compiler
         {"D|M", "1010101"}
     };
 
-    static readonly Dictionary<string, string> Dest = new()
+    static readonly Dictionary<string, string> Destination = new()
     {
         {"null", "000"},
         {"M", "001"},
@@ -97,12 +97,14 @@ public static class Compiler
         foreach (var line in linesOfCode)
         {
             string binaryLine = "";
+            // if the line starts with @, it's an A command  
             if (line.StartsWith('@'))
             {
                 var argument = line.Split('@')[1];
 
                 if (IsNumeric(argument))
                 {
+                    // @constant 
                     var argumentNumber = Convert.ToInt32(argument);
                     binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                 }
@@ -110,21 +112,25 @@ public static class Compiler
                 {
                     if (PreDefinedSymbols.ContainsKey(argument))
                     {
+                        //@predefined 
                         var argumentNumber = Convert.ToInt32(PreDefinedSymbols[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else if (Labels.ContainsKey(argument))
                     {
+                        //@label
                         var argumentNumber = Convert.ToInt32(Labels[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else if (Variables.ContainsKey(argument))
                     {
+                        //@variable for previous defined variable
                         var argumentNumber = Convert.ToInt32(Variables[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else
                     {
+                        //@variable for new variable
                         var variablePos = VARIABLE_START_POS + Variables.Count;
                         Variables.Add(argument, variablePos.ToString());
 
@@ -135,19 +141,21 @@ public static class Compiler
             }
             else if (line.StartsWith('('))
             {
+                // labels were already processed and are ignored here
                 continue;
             }
-            else
+            else // C command
             {
-                binaryLine += "111";
+                binaryLine += "111";                    // C command opcode
                 if (line.Contains('='))
                 {
-                    var dest = line.Split('=')[0];
-                    var comp = line.Split('=')[1].Split(";")[0];
+                    var dest = line.Split('=')[0];      //destination
+                    var comp = line.Split('=', ';')[1]; //computation
 
-                    binaryLine += Comp[comp];
-                    binaryLine += Dest[dest];
+                    binaryLine += Computation[comp];
+                    binaryLine += Destination[dest];
 
+                    // if the line contains a jump, add it to the binary line
                     if (line.Contains(';'))
                     {
                         var jump = line.Split(';')[1];
@@ -155,21 +163,25 @@ public static class Compiler
                     }
                     else
                     {
+                        // if the line doesn't contain a jump, add a null jump
                         binaryLine += "000";
                     }
                 }
                 else
                 {
+                    // if the line doesn't contain an equals sign, it's a C command without a destination
                     var comp = line.Split(";")[0];
-                    binaryLine += Comp[comp];
-                    binaryLine += "000";
+                    binaryLine += Computation[comp];
+                    binaryLine += "000"; // null destination
                     if (line.Contains(';'))
                     {
+                        // if the line contains a jump, add it to the binary line
                         var jump = line.Split(';')[1];
                         binaryLine += Jump[jump];
                     }
                     else
                     {
+                        // if the line doesn't contain a jump, add a null jump
                         binaryLine += "000";
                     }
 
@@ -187,6 +199,7 @@ public static class Compiler
         var lineNumber = 0;
         foreach (var line in linesOfCode)
         {
+            // if the line starts with '(', it's a label, add it to the dictionary
             if (line.StartsWith('('))
             {
                 var label = line.Split('(', ')')[1];
