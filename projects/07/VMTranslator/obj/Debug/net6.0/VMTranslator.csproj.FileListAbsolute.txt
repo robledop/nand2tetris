@@ -1,0 +1,15 @@
+C:\nand2tetris\projects\07\VMTranslator\bin\Debug\net6.0\VMTranslator.exe
+C:\nand2tetris\projects\07\VMTranslator\bin\Debug\net6.0\VMTranslator.deps.json
+C:\nand2tetris\projects\07\VMTranslator\bin\Debug\net6.0\VMTranslator.runtimeconfig.json
+C:\nand2tetris\projects\07\VMTranslator\bin\Debug\net6.0\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Debug\net6.0\VMTranslator.pdb
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.csproj.AssemblyReference.cache
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.GeneratedMSBuildEditorConfig.editorconfig
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.AssemblyInfoInputs.cache
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.AssemblyInfo.cs
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.csproj.CoreCompileInputs.cache
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\refint\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.pdb
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\VMTranslator.genruntimeconfig.cache
+C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net6.0\ref\VMTranslator.dll

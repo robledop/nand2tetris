@@ -112,25 +112,25 @@ public static class Compiler
                 {
                     if (PreDefinedSymbols.ContainsKey(argument))
                     {
-                        //@predefined 
+                        // @predefined 
                         var argumentNumber = Convert.ToInt32(PreDefinedSymbols[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else if (Labels.ContainsKey(argument))
                     {
-                        //@label
+                        // @label
                         var argumentNumber = Convert.ToInt32(Labels[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else if (Variables.ContainsKey(argument))
                     {
-                        //@variable for previous defined variable
+                        // @variable for previously defined variable
                         var argumentNumber = Convert.ToInt32(Variables[argument]);
                         binaryLine = $"0{Convert.ToString(argumentNumber, 2).PadLeft(15, '0')}";
                     }
                     else
                     {
-                        //@variable for new variable
+                        // @variable for new variable
                         var variablePos = VARIABLE_START_POS + Variables.Count;
                         Variables.Add(argument, variablePos.ToString());
 
