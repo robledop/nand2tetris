@@ -13,6 +13,13 @@ public static class Parser
             "pop" => CommandType.Pop,
             "add" => CommandType.Add,
             "sub" => CommandType.Sub,
+            "eq" => CommandType.Eq,
+            "lt" => CommandType.Lt,
+            "gt" => CommandType.Gt,
+            "neg" => CommandType.Neg,
+            "and" => CommandType.And,
+            "or" => CommandType.Or,
+            "not" => CommandType.Not,
             _ => throw new NotSupportedException()
         };
 
@@ -36,6 +43,13 @@ public enum CommandType
     Add,
     Push,
     Pop,
+    Lt,
+    Gt,
+    Eq,
+    Neg,
+    And,
+    Or,
+    Not,
     Label,
     Goto,
     If,

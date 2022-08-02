@@ -272,7 +272,7 @@ M=M+1
 
 // push temp 6 
 @11         
-A=M
+//A=M
 D=M
 @SP
 A=M

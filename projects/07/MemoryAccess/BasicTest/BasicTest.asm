@@ -143,7 +143,7 @@ M=M-1
 @SP
 A=M
 D=M
-@11
+@temp
 M=D
 
 // push local 0
@@ -272,7 +272,6 @@ M=M+1
 
 // push temp 6
 @11
-A=M
 D=M
 @SP
 A=M

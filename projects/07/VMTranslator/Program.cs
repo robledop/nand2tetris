@@ -8,7 +8,7 @@ if (args.Length == 0)
 }
 var file = args[0];
 var outputFile = args[1];
-//var file = "Rect.asm";
+
 var assemblyFile = $"{file.Split(".")[0]}.asm";
 var asmLines = new List<string>();
 
@@ -22,6 +22,13 @@ foreach (var line in code)
     {
         CommandType.Sub => CodeWriter.WriteSub(),
         CommandType.Add => CodeWriter.WriteAdd(),
+        CommandType.Eq => CodeWriter.WriteEq(),
+        CommandType.Gt => CodeWriter.WriteGt(),
+        CommandType.Lt => CodeWriter.WriteLt(),
+        CommandType.Neg => CodeWriter.WriteNeg(),
+        CommandType.And => CodeWriter.WriteAnd(),
+        CommandType.Or => CodeWriter.WriteOr(),
+        CommandType.Not => CodeWriter.WriteNot(),
         CommandType.Push => CodeWriter.WritePush(cmd, line),
         CommandType.Pop => CodeWriter.WritePop(cmd, line),
         _ => throw new ArgumentOutOfRangeException()

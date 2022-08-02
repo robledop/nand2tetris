@@ -4,6 +4,10 @@ namespace VMTranslator;
 
 public static class CodeWriter
 {
+    private static int _eqCount;
+    private static int _ltCount;
+    private static int _gtCount;
+
     public static string WriteAdd()
     {
         return @"// add
@@ -40,6 +44,137 @@ M=M+1
 ";
     }
 
+    public static string WriteEq()
+    {
+        var line = $@"// eq
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+D=D-M
+M=-1
+@EQ.TRUE.{_eqCount}
+D;JEQ
+@SP
+A=M
+M=0
+(EQ.TRUE.{_eqCount})
+@SP
+A=M
+@SP
+M=M+1
+";
+        _eqCount++;
+        return line;
+    }
+
+    public static string WriteLt()
+    {
+        var line = $@"// gt
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+D=D-M
+M=-1
+@GT.TRUE.{_gtCount}
+D;JGT
+@SP
+A=M
+M=0
+(GT.TRUE.{_gtCount})
+@SP
+A=M
+@SP
+M=M+1
+";
+        _gtCount++;
+        return line;
+    }
+
+    public static string WriteGt()
+    {
+        var line = $@"// lt
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+D=D-M
+M=-1
+@LT.TRUE.{_ltCount}
+D;JLT
+@SP
+A=M
+M=0
+(LT.TRUE.{_ltCount})
+@SP
+A=M
+@SP
+M=M+1
+";
+        _ltCount++;
+        return line;
+    }
+
+    public static string WriteNeg()
+    {
+        return @"// neg
+@SP
+A=M-1
+M=-M
+";
+    }
+
+    public static string WriteAnd()
+    {
+        return @"// and
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=D&M
+@SP
+M=M+1
+";
+    }
+
+    public static string WriteOr()
+    {
+        return @"// or
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=D|M
+@SP
+M=M+1
+";
+    }
+
+    public static string WriteNot()
+    {
+        return @"// not
+@SP
+A=M-1
+M=!M
+";
+    }
+
     public static string WritePush(CommandInformation command, string line)
     {
         var sb = new StringBuilder();
@@ -50,18 +185,28 @@ M=M+1
             return WritePushConstant(command, line);
         }
 
-        //sb.AppendLine();
         sb.AppendLine(@$"// {line}");
 
-        sb.AppendLine($"@{segment}");
-        sb.AppendLine("A=M");
+        if (segment == "temp")
+        {
+            sb.AppendLine($"@{5 + command.Arg2}");
+        }
+        else
+        {
+            sb.AppendLine($"@{segment}");
+        }
+        
+        if (segment != "temp")
+        {
+            sb.AppendLine("A=M");
+        }
 
         if (segment is "LCL" or "ARG" or "THIS" or "THAT")
         {
             var offset = command.Arg2;
             for (int i = 0; i < offset; i++)
             {
-                sb.AppendLine("A=A+1");
+                sb.AppendLine("A=A+1");  // inefficient, I know
             }
         }
 
@@ -79,7 +224,6 @@ M=M+1
     {
         var sb = new StringBuilder();
 
-        //sb.AppendLine();
         sb.AppendLine(@$"// {line}");
         var segment = GetSegment(command);
 
@@ -95,13 +239,12 @@ A=M
         {
             sb.AppendLine($"A=M");
         }
-        //sb.AppendLine(@"A=M");
         if (segment is "LCL" or "ARG" or "THIS" or "THAT")
         {
             var offset = command.Arg2;
             for (int i = 0; i < offset; i++)
             {
-                sb.AppendLine("A=A+1");
+                sb.AppendLine("A=A+1"); // inefficient, I know 
             }
         }
 
@@ -124,7 +267,7 @@ M=M+1
         return sb.ToString();
     }
 
-    private static string? GetSegment(CommandInformation command)
+    private static string GetSegment(CommandInformation command)
     {
         return command.Arg1 switch
         {
@@ -132,8 +275,10 @@ M=M+1
             "argument" => "ARG",
             "this" => "THIS",
             "that" => "THAT",
-            "temp" => (5 + command.Arg2).ToString(),
+            "temp" => "temp",
             "constant" => "constant",
+            "pointer" => "pointer",
+            "static" => "static",
             _ => throw new NotImplementedException()
         };
     }
