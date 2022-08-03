@@ -1,8 +1,9 @@
 {
   "runtimeOptions": {
     "additionalProbingPaths": [
-      "/home/robledo/.dotnet/store/|arch|/|tfm|",
-      "/home/robledo/.nuget/packages"
+      "C:\\Users\\Robledo\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\Robledo\\.nuget\\packages",
+      "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
     ]
   }
 }
