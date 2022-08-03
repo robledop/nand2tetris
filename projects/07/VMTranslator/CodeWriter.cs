@@ -225,10 +225,6 @@ namespace VMTranslator
             else
             {
                 sb.AppendLine($"@{segment}");
-            }
-
-            if (segment != "temp")
-            {
                 sb.AppendLine("A=M");
             }
 
