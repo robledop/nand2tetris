@@ -1,0 +1,6 @@
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\VMTranslator.pdb
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\clrcompression.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\clrjit.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\coreclr.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\mscordaccore.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\win-x86\VMTranslator.exe

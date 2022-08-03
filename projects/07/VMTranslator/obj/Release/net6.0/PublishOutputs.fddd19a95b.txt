@@ -1,0 +1,5 @@
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\VMTranslator.exe
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\VMTranslator.deps.json
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\VMTranslator.runtimeconfig.json
+C:\nand2tetris\projects\07\VMTranslator\bin\Release\net6.0\publish\VMTranslator.pdb
