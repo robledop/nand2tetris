@@ -290,6 +290,137 @@ namespace VMTranslator
             return sb.ToString();
         }
 
+        public static string WriteLabel(CommandInformation command, string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"// {line}");
+
+            sb.AppendLine($"({command.Arg1})");
+
+            return sb.ToString();
+        }
+
+        public static string WriteIfGoto(CommandInformation command, string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"// {line}");
+
+            sb.AppendLine("@SP");
+            sb.AppendLine("AM=M-1");
+            sb.AppendLine("D=M");
+            sb.AppendLine($"@{command.Arg1}");
+            sb.AppendLine("D;JNE");
+
+            return sb.ToString();
+        }
+
+        public static string WriteGoto(CommandInformation command, string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"// {line}");
+
+            sb.AppendLine($"@{command.Arg1}");
+            sb.AppendLine("0;JMP");
+
+            return sb.ToString();
+        }
+
+        public static string WriteFunction(CommandInformation command, string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"// {line}");
+
+            sb.AppendLine($"({command.Arg1})");
+            for (int i = 0; i < command.Arg2; i++)
+            {
+                sb.AppendLine("@SP");
+                sb.AppendLine("A=M");
+                sb.AppendLine("M=0");
+                sb.AppendLine("@SP");
+                sb.AppendLine("M=M+1");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string WriteReturn(string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"// {line}");
+
+            sb.AppendLine($"// FRAME = LCL");
+            sb.AppendLine("@LCL");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// RET = *(FRAME - 5)");
+            sb.AppendLine("@5");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("D=M-D");
+            sb.AppendLine("@RET");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// *ARG = pop()");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M-1");
+            sb.AppendLine("A=M");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@ARG");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// SP = ARG + 1");
+            sb.AppendLine("@ARG");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=D+1");
+
+            sb.AppendLine("// THAT = *(FRAME-1)");
+            sb.AppendLine("@1");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("D=M-D");
+            sb.AppendLine("@THAT");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// THIS = *(FRAME-2)");
+            sb.AppendLine("@2");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("D=M-D");
+            sb.AppendLine("@THIS");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// ARG = *(FRAME-3)");
+            sb.AppendLine("@3");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("D=M-D");
+            sb.AppendLine("@ARG");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// LCL = *(FRAME-4)");
+            sb.AppendLine("@4");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@FRAME");
+            sb.AppendLine("D=M-D");
+            sb.AppendLine("@LCL");
+            sb.AppendLine("M=D");
+
+            sb.AppendLine("// goto RET");
+            sb.AppendLine("@RET");
+            sb.AppendLine("A=M");
+            sb.AppendLine("0;JMP");
+
+            return sb.ToString();
+        }
+
         static string WritePopStatic(CommandInformation command, string line, string fileName)
         {
             var className = fileName.Split('.')[0];

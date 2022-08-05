@@ -40,6 +40,11 @@ namespace VMTranslator
                     CommandType.Not => CodeWriter.WriteNot(),
                     CommandType.Push => CodeWriter.WritePush(cmd, line, fileName),
                     CommandType.Pop => CodeWriter.WritePop(cmd, line, fileName),
+                    CommandType.Label => CodeWriter.WriteLabel(cmd, line),
+                    CommandType.If => CodeWriter.WriteIfGoto(cmd, line),
+                    CommandType.Goto => CodeWriter.WriteGoto(cmd, line),
+                    CommandType.Function => CodeWriter.WriteFunction(cmd, line),
+                    CommandType.Return => CodeWriter.WriteReturn(line),
                     _ => throw new ArgumentOutOfRangeException()
                 };
 

@@ -36,3 +36,9 @@ C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net5.0\refint\VMTranslator.dll
 C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net5.0\VMTranslator.pdb
 C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net5.0\VMTranslator.genruntimeconfig.cache
 C:\nand2tetris\projects\07\VMTranslator\obj\Debug\net5.0\ref\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.exe
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.deps.json
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.runtimeconfig.json
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.runtimeconfig.dev.json
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.dll
+C:\nand2tetris\projects\07\VMTranslator\build\VMTranslator.pdb

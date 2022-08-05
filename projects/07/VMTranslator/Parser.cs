@@ -22,15 +22,26 @@ namespace VMTranslator
                 "and" => CommandType.And,
                 "or" => CommandType.Or,
                 "not" => CommandType.Not,
+                "label" => CommandType.Label,
+                "if-goto" => CommandType.If,
+                "goto" => CommandType.Goto,
+                "function" => CommandType.Function,
+                "return" => CommandType.Return,
+                "call" => CommandType.Call,
                 _ => throw new NotSupportedException()
             };
 
             string arg1 = null;
             int? arg2 = null;
-            if (type is CommandType.Pop or CommandType.Push)
+            if (type is CommandType.Pop or CommandType.Push or CommandType.Function)
             {
                 arg1 = parts[1];
                 arg2 = int.Parse(parts[2]);
+            }
+
+            if (type is CommandType.Label or CommandType.If or CommandType.Goto)
+            {
+                arg1 = parts[1];
             }
 
             return new CommandInformation(type, arg1, arg2);
