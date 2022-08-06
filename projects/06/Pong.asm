@@ -12,7 +12,7 @@
 D=A
 @SP
 M=D
-@133
+@Sys.init
 0;JMP
 @R15
 M=D

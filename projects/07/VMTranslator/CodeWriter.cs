@@ -8,13 +8,26 @@ namespace VMTranslator
         private static int _eqCount;
         private static int _ltCount;
         private static int _gtCount;
+        private static int _frameCount;
+        private static int _retCount;
+
+        public static string WriteInit()
+        {
+            var sb = new StringBuilder();
+            sb.Append(@"@256
+D=A
+@SP
+M=D         // bootstrap
+");
+            sb.Append(WriteCall(new CommandInformation(CommandType.Call, "Sys.init", 0), "call Sys.init 0"));
+            return sb.ToString();
+        }
 
         public static string WriteAdd()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// add");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = add");
             sb.AppendLine("M=M-1");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
@@ -25,7 +38,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("M=M+D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }
@@ -33,9 +46,8 @@ namespace VMTranslator
         public static string WriteSub()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// sub");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = sub");
             sb.AppendLine("M=M-1");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
@@ -46,7 +58,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("M=M-D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
             
            return sb.ToString();
         }
@@ -54,9 +66,8 @@ namespace VMTranslator
         public static string WriteEq()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// eq");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = eq");
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
@@ -74,7 +85,7 @@ namespace VMTranslator
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             _eqCount++;
             return sb.ToString();
@@ -83,9 +94,8 @@ namespace VMTranslator
         public static string WriteLt()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// lt");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = lt");
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
@@ -103,7 +113,7 @@ namespace VMTranslator
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             _gtCount++;
             return sb.ToString();
@@ -112,9 +122,8 @@ namespace VMTranslator
         public static string WriteGt()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// gt");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = gt");
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
@@ -132,7 +141,7 @@ namespace VMTranslator
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             _ltCount++;
 
@@ -142,11 +151,10 @@ namespace VMTranslator
         public static string WriteNeg()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// neg");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = neg");
             sb.AppendLine("A=M-1");
-            sb.AppendLine("M=-M");
+            sb.Append("M=-M");
 
             return sb.ToString();
         }
@@ -154,9 +162,8 @@ namespace VMTranslator
         public static string WriteAnd()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// and");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = and");
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
@@ -165,7 +172,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("M=D&M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }
@@ -173,8 +180,7 @@ namespace VMTranslator
         public static string WriteOr()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// or");
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = or");
 
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
@@ -184,7 +190,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("M=D|M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }
@@ -192,11 +198,10 @@ namespace VMTranslator
         public static string WriteNot()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// not");
 
-            sb.AppendLine("@SP");
+            sb.AppendLine("@SP      // line = not");
             sb.AppendLine("A=M-1");
-            sb.AppendLine("M=!M");
+            sb.Append("M=!M");
 
             return sb.ToString();
         }
@@ -216,15 +221,13 @@ namespace VMTranslator
                     return WritePushPointer(command, line);
             }
 
-            sb.AppendLine($"// {line}");
-
             if (segment == "temp")
             {
-                sb.AppendLine($"@{5 + command.Arg2}");
+                sb.AppendLine($"@{5 + command.Arg2}     // line = {line}");
             }
             else
             {
-                sb.AppendLine($"@{segment}");
+                sb.AppendLine($"@{segment}      // line = {line}");
                 sb.AppendLine("A=M");
             }
 
@@ -242,7 +245,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("M=D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }
@@ -251,7 +254,6 @@ namespace VMTranslator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
             var segment = GetSegment(command);
 
             switch (segment)
@@ -262,7 +264,7 @@ namespace VMTranslator
                     return WritePopPointer(command, line);
             }
 
-            sb.AppendLine("@SP");
+            sb.AppendLine($"@SP     // line = {line}");
             sb.AppendLine("M=M-1");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
@@ -286,7 +288,7 @@ namespace VMTranslator
                 }
             }
 
-            sb.AppendLine("M=D");
+            sb.Append("M=D");
             return sb.ToString();
         }
 
@@ -294,9 +296,7 @@ namespace VMTranslator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-
-            sb.AppendLine($"({command.Arg1})");
+            sb.Append($"({command.Arg1})        // line = {line}");
 
             return sb.ToString();
         }
@@ -305,13 +305,11 @@ namespace VMTranslator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-
-            sb.AppendLine("@SP");
+            sb.AppendLine($"@SP     // line = {line}");
             sb.AppendLine("AM=M-1");
             sb.AppendLine("D=M");
             sb.AppendLine($"@{command.Arg1}");
-            sb.AppendLine("D;JNE");
+            sb.Append("D;JNE");
 
             return sb.ToString();
         }
@@ -320,10 +318,8 @@ namespace VMTranslator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-
-            sb.AppendLine($"@{command.Arg1}");
-            sb.AppendLine("0;JMP");
+            sb.AppendLine($"@{command.Arg1}     // line = {line}");
+            sb.Append("0;JMP");
 
             return sb.ToString();
         }
@@ -332,102 +328,152 @@ namespace VMTranslator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-
-            sb.AppendLine($"({command.Arg1})");
+            sb.Append($"({command.Arg1})        // line = {line}");
             for (int i = 0; i < command.Arg2; i++)
             {
-                sb.AppendLine("@SP");
-                sb.AppendLine("A=M");
-                sb.AppendLine("M=0");
-                sb.AppendLine("@SP");
-                sb.AppendLine("M=M+1");
+                sb.Append(@"
+@SP
+A=M
+M=0
+@SP
+M=M+1");
             }
 
             return sb.ToString();
         }
 
-        public static string WriteReturn(string line)
+        public static string WriteReturn(string line, string fileName)
         {
+            var className = fileName.Split('.')[0];
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-
-            sb.AppendLine($"// FRAME = LCL");
-            sb.AppendLine("@LCL");
+            sb.AppendLine($"@LCL        // line = {line}");
             sb.AppendLine("D=M");
-            sb.AppendLine("@FRAME");
-            sb.AppendLine("M=D");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine("M=D // FRAME = LCL");
 
-            sb.AppendLine("// RET = *(FRAME - 5)");
             sb.AppendLine("@5");
             sb.AppendLine("D=A");
-            sb.AppendLine("@FRAME");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
-            sb.AppendLine("@RET");
-            sb.AppendLine("M=D");
+            sb.AppendLine($"@{className}$RET.{_retCount}");
+            sb.AppendLine("M=D      // RET = *(FRAME - 5)");
 
-            sb.AppendLine("// *ARG = pop()");
             sb.AppendLine("@SP");
             sb.AppendLine("M=M-1");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
             sb.AppendLine("@ARG");
             sb.AppendLine("A=M");
-            sb.AppendLine("M=D");
+            sb.AppendLine("M=D      // *ARG = pop()");
 
-            sb.AppendLine("// SP = ARG + 1");
             sb.AppendLine("@ARG");
             sb.AppendLine("D=M");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=D+1");
+            sb.AppendLine("M=D+1    // SP = ARG + 1");
 
-            sb.AppendLine("// THAT = *(FRAME-1)");
             sb.AppendLine("@1");
             sb.AppendLine("D=A");
-            sb.AppendLine("@FRAME");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
             sb.AppendLine("@THAT");
-            sb.AppendLine("M=D");
+            sb.AppendLine("M=D      // THAT = *(FRAME-1)");
 
-            sb.AppendLine("// THIS = *(FRAME-2)");
             sb.AppendLine("@2");
             sb.AppendLine("D=A");
-            sb.AppendLine("@FRAME");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
             sb.AppendLine("@THIS");
-            sb.AppendLine("M=D");
+            sb.AppendLine("M=D      // THIS = *(FRAME-2)");
 
-            sb.AppendLine("// ARG = *(FRAME-3)");
             sb.AppendLine("@3");
             sb.AppendLine("D=A");
-            sb.AppendLine("@FRAME");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
             sb.AppendLine("@ARG");
-            sb.AppendLine("M=D");
+            sb.AppendLine("M=D      // ARG = *(FRAME-3)");
 
-            sb.AppendLine("// LCL = *(FRAME-4)");
             sb.AppendLine("@4");
             sb.AppendLine("D=A");
-            sb.AppendLine("@FRAME");
+            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
             sb.AppendLine("@LCL");
-            sb.AppendLine("M=D");
+            sb.AppendLine("M=D      // LCL = *(FRAME-4)");
 
-            sb.AppendLine("// goto RET");
-            sb.AppendLine("@RET");
+            sb.AppendLine($"@{className}$RET.{_retCount}");
             sb.AppendLine("A=M");
+            sb.Append("0;JMP        // goto RET");
+
+            _frameCount++;
+            _retCount++;
+
+            return sb.ToString();
+        }
+
+        public static string WriteCall(CommandInformation command, string line)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"@RET_ADDRESS.{command.Arg1}     // line = {line}");
+            sb.AppendLine("D=A");
+            sb.AppendLine("@SP");
+            sb.AppendLine("A=M");
+            sb.AppendLine("M=D");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M+1        // push return-address");
+            sb.AppendLine("@LCL");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@SP");
+            sb.AppendLine("A=M");
+            sb.AppendLine("M=D");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M+1        // push LCL");
+            sb.AppendLine("@ARG");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@SP");
+            sb.AppendLine("A=M");
+            sb.AppendLine("M=D");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M+1        // push ARG");
+            sb.AppendLine("@THIS");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@SP");
+            sb.AppendLine("A=M");
+            sb.AppendLine("M=D");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M+1        // push THIS");
+            sb.AppendLine("@THAT");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@SP");
+            sb.AppendLine("A=M");
+            sb.AppendLine("M=D");
+            sb.AppendLine("@SP");
+            sb.AppendLine("M=M+1        // push THAT");
+            sb.AppendLine("@SP");
+            sb.AppendLine("D=M");
+            sb.AppendLine($"@{command.Arg2}");
+            sb.AppendLine("D=D-A");
+            sb.AppendLine("@5");
+            sb.AppendLine("D=D-A");
+            sb.AppendLine("@ARG");
+            sb.AppendLine("M=D          // ARG=SP-n-5");
+            sb.AppendLine("@SP");
+            sb.AppendLine("D=M");
+            sb.AppendLine("@LCL");
+            sb.AppendLine("M=D          // LCL=SP");
+            sb.AppendLine($"@{command.Arg1}");
             sb.AppendLine("0;JMP");
+            sb.Append($"(RET_ADDRESS.{command.Arg1})");
 
             return sb.ToString();
         }
@@ -437,14 +483,13 @@ namespace VMTranslator
             var className = fileName.Split('.')[0];
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-            sb.AppendLine("@SP");
+            sb.AppendLine($"@SP     // line = {line}");
             sb.AppendLine("M=M-1");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
             sb.AppendLine($"@{className}.{command.Arg2}");
-            sb.AppendLine("M=D");
+            sb.Append("M=D");
 
             return sb.ToString();
         }
@@ -454,14 +499,13 @@ namespace VMTranslator
             var className = fileName.Split('.')[0];
             var sb = new StringBuilder();
 
-            sb.AppendLine($"// {line}");
-            sb.AppendLine($"@{className}.{command.Arg2}");
+            sb.AppendLine($"@{className}.{command.Arg2}     // line = {line}");
             sb.AppendLine("D=M");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("M=D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }
@@ -469,14 +513,13 @@ namespace VMTranslator
         static string WritePushConstant(CommandInformation command, string line)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"// {line}");
-            sb.AppendLine($"@{command.Arg2}");
+            sb.AppendLine($"@{command.Arg2}     // line = {line}");
             sb.AppendLine("D=A");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("M=D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
             return sb.ToString();
         }
 
@@ -484,15 +527,14 @@ namespace VMTranslator
         {
             string thisOrThat = command.Arg2 == 0 ? "THIS" : "THAT";
             var sb = new StringBuilder();
-            sb.AppendLine($"// {line}");
-            sb.AppendLine("@SP");
+            sb.AppendLine($"@SP     // line = {line}");
             sb.AppendLine("M=M-1");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
             sb.AppendLine($"@{thisOrThat}");
             sb.AppendLine("M=D");
-            sb.AppendLine("@SP");
+            sb.Append("@SP");
 
             return sb.ToString();
         }
@@ -501,14 +543,13 @@ namespace VMTranslator
         {
             string thisOrThat = command.Arg2 == 0 ? "THIS" : "THAT";
             var sb = new StringBuilder();
-            sb.AppendLine($"// {line}");
-            sb.AppendLine($"@{thisOrThat}");
+            sb.AppendLine($"@{thisOrThat}       // line = {line}");
             sb.AppendLine("D=M");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
             sb.AppendLine("M=D");
             sb.AppendLine("@SP");
-            sb.AppendLine("M=M+1");
+            sb.Append("M=M+1");
 
             return sb.ToString();
         }

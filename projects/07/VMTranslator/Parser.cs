@@ -28,12 +28,15 @@ namespace VMTranslator
                 "function" => CommandType.Function,
                 "return" => CommandType.Return,
                 "call" => CommandType.Call,
-                _ => throw new NotSupportedException()
+                _ => throw new NotSupportedException(command)
             };
 
             string arg1 = null;
             int? arg2 = null;
-            if (type is CommandType.Pop or CommandType.Push or CommandType.Function)
+            if (type is CommandType.Pop or 
+                CommandType.Push or
+                CommandType.Function or 
+                CommandType.Call)
             {
                 arg1 = parts[1];
                 arg2 = int.Parse(parts[2]);

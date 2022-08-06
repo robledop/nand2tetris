@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 
 namespace VMTranslator
 {
@@ -15,13 +16,45 @@ namespace VMTranslator
                 Console.WriteLine("Provide a source file");
                 return;
             }
-            var file = args[0];
+            var path = args[0];
 
-            var fileName = Path.GetFileName(file);
-            var assemblyFile = file.Replace(".vm", ".asm", StringComparison.OrdinalIgnoreCase);
+            FileAttributes attr = File.GetAttributes(path);
+            var isDirectory = (attr & FileAttributes.Directory) == FileAttributes.Directory;
+
+            if (isDirectory)
+            {
+                var endsWithDirSeparator = Path.EndsInDirectorySeparator(path);
+                path = endsWithDirSeparator ? path.TrimEnd(Path.DirectorySeparatorChar) : path;
+
+                var code = new List<string>();
+                var vmFiles = Directory.EnumerateFiles(path, "*.vm");
+                // bootstrap
+                code.Add(CodeWriter.WriteInit());
+
+                foreach (var file in vmFiles)
+                {
+                    var asmLines = ProcessFile(file);
+                    code.AddRange(asmLines);
+                }
+
+                File.WriteAllText($"{path}.asm", string.Join(Environment.NewLine, code));
+            }
+            else
+            {
+                var assemblyFile = path.Replace(".vm", ".asm", StringComparison.OrdinalIgnoreCase);
+                var asmLines = ProcessFile(path);
+
+                File.WriteAllText(assemblyFile, string.Join(Environment.NewLine, asmLines));
+            }
+
+        }
+
+        static List<string> ProcessFile(string path)
+        {
             var asmLines = new List<string>();
+            var fileName = Path.GetFileName(path);
 
-            var lines = File.ReadAllLines(file).ToList();
+            var lines = File.ReadAllLines(path).ToList();
             var code = RemoveComments(lines);
 
             foreach (var line in code)
@@ -44,15 +77,15 @@ namespace VMTranslator
                     CommandType.If => CodeWriter.WriteIfGoto(cmd, line),
                     CommandType.Goto => CodeWriter.WriteGoto(cmd, line),
                     CommandType.Function => CodeWriter.WriteFunction(cmd, line),
-                    CommandType.Return => CodeWriter.WriteReturn(line),
-                    _ => throw new ArgumentOutOfRangeException()
+                    CommandType.Return => CodeWriter.WriteReturn(line, fileName),
+                    CommandType.Call => CodeWriter.WriteCall(cmd, line),
+                    _ => throw new ArgumentOutOfRangeException(line)
                 };
 
                 asmLines.Add(asmLine);
             }
 
-            File.WriteAllText(assemblyFile, string.Join(Environment.NewLine, asmLines));
-
+            return asmLines;
         }
 
         static List<string> RemoveComments(List<string> list)
