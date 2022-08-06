@@ -364,6 +364,8 @@ namespace VMTranslator
             sb.AppendLine("D=A");
             sb.AppendLine("@FRAME");
             sb.AppendLine("D=M-D");
+            sb.AppendLine("A=D");
+            sb.AppendLine("D=M");
             sb.AppendLine("@RET");
             sb.AppendLine("M=D");
 
@@ -373,6 +375,7 @@ namespace VMTranslator
             sb.AppendLine("A=M");
             sb.AppendLine("D=M");
             sb.AppendLine("@ARG");
+            sb.AppendLine("A=M");
             sb.AppendLine("M=D");
 
             sb.AppendLine("// SP = ARG + 1");
@@ -386,6 +389,8 @@ namespace VMTranslator
             sb.AppendLine("D=A");
             sb.AppendLine("@FRAME");
             sb.AppendLine("D=M-D");
+            sb.AppendLine("A=D");
+            sb.AppendLine("D=M");
             sb.AppendLine("@THAT");
             sb.AppendLine("M=D");
 
@@ -394,6 +399,8 @@ namespace VMTranslator
             sb.AppendLine("D=A");
             sb.AppendLine("@FRAME");
             sb.AppendLine("D=M-D");
+            sb.AppendLine("A=D");
+            sb.AppendLine("D=M");
             sb.AppendLine("@THIS");
             sb.AppendLine("M=D");
 
@@ -402,6 +409,8 @@ namespace VMTranslator
             sb.AppendLine("D=A");
             sb.AppendLine("@FRAME");
             sb.AppendLine("D=M-D");
+            sb.AppendLine("A=D");
+            sb.AppendLine("D=M");
             sb.AppendLine("@ARG");
             sb.AppendLine("M=D");
 
@@ -410,6 +419,8 @@ namespace VMTranslator
             sb.AppendLine("D=A");
             sb.AppendLine("@FRAME");
             sb.AppendLine("D=M-D");
+            sb.AppendLine("A=D");
+            sb.AppendLine("D=M");
             sb.AppendLine("@LCL");
             sb.AppendLine("M=D");
 

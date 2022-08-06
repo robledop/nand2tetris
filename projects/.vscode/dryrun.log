@@ -1,4 +1,6 @@
 make.exe --dry-run --always-make --keep-going --print-directory
-'make.exe' is not recognized as an internal or external command,
-operable program or batch file.
+make: Entering directory 'c:/nand2tetris/projects'
+make: Leaving directory 'c:/nand2tetris/projects'
+ 
+make: *** No targets specified and no makefile found.  Stop.
 

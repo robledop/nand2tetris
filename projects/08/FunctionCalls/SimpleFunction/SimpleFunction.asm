@@ -111,6 +111,8 @@ M=D
 D=A
 @FRAME
 D=M-D
+A=D
+D=M
 @RET
 M=D
 // *ARG = pop()
@@ -119,6 +121,7 @@ M=M-1
 A=M
 D=M
 @ARG
+A=M
 M=D
 // SP = ARG + 1
 @ARG
@@ -130,6 +133,8 @@ M=D+1
 D=A
 @FRAME
 D=M-D
+A=D
+D=M
 @THAT
 M=D
 // THIS = *(FRAME-2)
@@ -137,6 +142,8 @@ M=D
 D=A
 @FRAME
 D=M-D
+A=D
+D=M
 @THIS
 M=D
 // ARG = *(FRAME-3)
@@ -144,6 +151,8 @@ M=D
 D=A
 @FRAME
 D=M-D
+A=D
+D=M
 @ARG
 M=D
 // LCL = *(FRAME-4)
@@ -151,6 +160,8 @@ M=D
 D=A
 @FRAME
 D=M-D
+A=D
+D=M
 @LCL
 M=D
 // goto RET

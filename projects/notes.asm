@@ -14,6 +14,9 @@ D=M 	// Load the D register with the value at the address x
 @y		// Load the A register with the address for the variable y
 M=D 	// Set the value of y to the contents of the D register
 
+@SP     // Load the A register with the address for the stack pointer
+A=M     // Load the A register with the value at the address for the stack pointer
+
 // FUNCTION
 // #####################################################################
 // (f)
