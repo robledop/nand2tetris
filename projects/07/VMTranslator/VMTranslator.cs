@@ -28,6 +28,7 @@ namespace VMTranslator
 
                 var code = new List<string>();
                 var vmFiles = Directory.EnumerateFiles(path, "*.vm");
+
                 // bootstrap
                 code.Add(CodeWriter.WriteInit());
 
@@ -37,7 +38,9 @@ namespace VMTranslator
                     code.AddRange(asmLines);
                 }
 
-                File.WriteAllText($"{path}.asm", string.Join(Environment.NewLine, code));
+                var dirName = path.Split(Path.DirectorySeparatorChar).Last();
+
+                File.WriteAllText($"{dirName}{Path.DirectorySeparatorChar}{path}.asm", string.Join(Environment.NewLine, code));
             }
             else
             {
@@ -57,6 +60,7 @@ namespace VMTranslator
             var lines = File.ReadAllLines(path).ToList();
             var code = RemoveComments(lines);
 
+            var currentFunction = "";
             foreach (var line in code)
             {
                 var cmd = Parser.Parse(line);
@@ -73,14 +77,19 @@ namespace VMTranslator
                     CommandType.Not => CodeWriter.WriteNot(),
                     CommandType.Push => CodeWriter.WritePush(cmd, line, fileName),
                     CommandType.Pop => CodeWriter.WritePop(cmd, line, fileName),
-                    CommandType.Label => CodeWriter.WriteLabel(cmd, line),
-                    CommandType.If => CodeWriter.WriteIfGoto(cmd, line),
-                    CommandType.Goto => CodeWriter.WriteGoto(cmd, line),
+                    CommandType.Label => CodeWriter.WriteLabel(cmd, line, currentFunction),
+                    CommandType.If => CodeWriter.WriteIfGoto(cmd, line, currentFunction),
+                    CommandType.Goto => CodeWriter.WriteGoto(cmd, line, currentFunction),
                     CommandType.Function => CodeWriter.WriteFunction(cmd, line),
-                    CommandType.Return => CodeWriter.WriteReturn(line, fileName),
+                    CommandType.Return => CodeWriter.WriteReturn(line, currentFunction),
                     CommandType.Call => CodeWriter.WriteCall(cmd, line),
                     _ => throw new ArgumentOutOfRangeException(line)
                 };
+
+                if (cmd.Type is CommandType.Function)
+                {
+                    currentFunction = cmd.Arg1;
+                }
 
                 asmLines.Add(asmLine);
             }

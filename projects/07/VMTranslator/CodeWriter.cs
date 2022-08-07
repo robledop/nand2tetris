@@ -10,6 +10,7 @@ namespace VMTranslator
         private static int _gtCount;
         private static int _frameCount;
         private static int _retCount;
+        private static int _retAddrCount;
 
         public static string WriteInit()
         {
@@ -292,33 +293,34 @@ M=D         // bootstrap
             return sb.ToString();
         }
 
-        public static string WriteLabel(CommandInformation command, string line)
+        public static string WriteLabel(CommandInformation command, string line, string currentFunction)
         {
             var sb = new StringBuilder();
 
-            sb.Append($"({command.Arg1})        // line = {line}");
+            sb.Append($"({currentFunction}${command.Arg1})        // line = {line}");
 
             return sb.ToString();
         }
 
-        public static string WriteIfGoto(CommandInformation command, string line)
+        public static string WriteIfGoto(CommandInformation command, string line, string currentFunction)
         {
             var sb = new StringBuilder();
 
             sb.AppendLine($"@SP     // line = {line}");
             sb.AppendLine("AM=M-1");
             sb.AppendLine("D=M");
-            sb.AppendLine($"@{command.Arg1}");
+            sb.AppendLine($"@{currentFunction}${command.Arg1}");
             sb.Append("D;JNE");
 
             return sb.ToString();
         }
 
-        public static string WriteGoto(CommandInformation command, string line)
+        public static string WriteGoto(CommandInformation command, string line, string currentFunction)
         {
+
             var sb = new StringBuilder();
 
-            sb.AppendLine($"@{command.Arg1}     // line = {line}");
+            sb.AppendLine($"@{currentFunction}${command.Arg1}     // line = {line}");
             sb.Append("0;JMP");
 
             return sb.ToString();
@@ -342,23 +344,22 @@ M=M+1");
             return sb.ToString();
         }
 
-        public static string WriteReturn(string line, string fileName)
+        public static string WriteReturn(string line, string currentFunction)
         {
-            var className = fileName.Split('.')[0];
             var sb = new StringBuilder();
 
             sb.AppendLine($"@LCL        // line = {line}");
             sb.AppendLine("D=M");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("M=D // FRAME = LCL");
 
             sb.AppendLine("@5");
             sb.AppendLine("D=A");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
-            sb.AppendLine($"@{className}$RET.{_retCount}");
+            sb.AppendLine($"@{currentFunction}$RET.{_retCount}");
             sb.AppendLine("M=D      // RET = *(FRAME - 5)");
 
             sb.AppendLine("@SP");
@@ -376,7 +377,7 @@ M=M+1");
 
             sb.AppendLine("@1");
             sb.AppendLine("D=A");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
@@ -385,7 +386,7 @@ M=M+1");
 
             sb.AppendLine("@2");
             sb.AppendLine("D=A");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
@@ -394,7 +395,7 @@ M=M+1");
 
             sb.AppendLine("@3");
             sb.AppendLine("D=A");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
@@ -403,14 +404,14 @@ M=M+1");
 
             sb.AppendLine("@4");
             sb.AppendLine("D=A");
-            sb.AppendLine($"@{className}$FRAME.{_frameCount}");
+            sb.AppendLine($"@{currentFunction}$FRAME.{_frameCount}");
             sb.AppendLine("D=M-D");
             sb.AppendLine("A=D");
             sb.AppendLine("D=M");
             sb.AppendLine("@LCL");
             sb.AppendLine("M=D      // LCL = *(FRAME-4)");
 
-            sb.AppendLine($"@{className}$RET.{_retCount}");
+            sb.AppendLine($"@{currentFunction}$RET.{_retCount}");
             sb.AppendLine("A=M");
             sb.Append("0;JMP        // goto RET");
 
@@ -424,7 +425,7 @@ M=M+1");
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"@RET_ADDRESS.{command.Arg1}     // line = {line}");
+            sb.AppendLine($"@RET_ADDRESS.{command.Arg1}.{_retAddrCount}     // line = {line}");
             sb.AppendLine("D=A");
             sb.AppendLine("@SP");
             sb.AppendLine("A=M");
@@ -473,8 +474,9 @@ M=M+1");
             sb.AppendLine("M=D          // LCL=SP");
             sb.AppendLine($"@{command.Arg1}");
             sb.AppendLine("0;JMP");
-            sb.Append($"(RET_ADDRESS.{command.Arg1})");
-
+            sb.Append($"(RET_ADDRESS.{command.Arg1}.{_retAddrCount})");
+            
+            _retAddrCount++;
             return sb.ToString();
         }
 
