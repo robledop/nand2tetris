@@ -67,8 +67,8 @@ class Board
                 let isBottomEdge = (j = (_rows - 1));
                 let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
                 
-                if (~isEdge)
-                {
+                // if (~isEdge)
+                // {
                     if (isLeftEdge) 
                     {
                         let xL = (_numberOfColumns - 1);
@@ -140,7 +140,7 @@ class Board
                     let cellToAdd = columnToAdd[yB];
                     do currentCell.setNeighbor(7, cellToAdd);
 
-                }
+                // }
 
                 let j = j + 1;
             }
@@ -212,10 +212,8 @@ class Board
             let i = i + 1;
         }
 
-
         return;
     }
-
 
     method void advance()
     {
@@ -223,7 +221,6 @@ class Board
         var Array currentColumn;
         var Cell currentCell;
         var boolean isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isEdge;
-        
 
         let i = 0;
         while (i < _numberOfColumns) 
@@ -237,12 +234,12 @@ class Board
                 let isBottomEdge = (j = (_rows - 1));
                 let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
                 
-                if(~isEdge)
-                {
+                // if(~isEdge)
+                // {
                     let currentColumn = _columns[i];
                     let currentCell = currentColumn[j];
                     do currentCell.determineNextLiveState();
-                }
+                // }
                 let j = j + 1;
             }
             let i = i + 1;
@@ -267,15 +264,24 @@ class Board
 
     method void dispose() 
     {
-        var int i;
-        do Memory.deAlloc(this);
-        let i = 0;
-        while (i < _rows) 
+        var Array currentColumn;
+        var int i, j;
+        let i = 0;    
+        while (i < _numberOfColumns) 
         {
-            do Memory.deAlloc(_columns[i]);
+            let j = 0;
+            while (j < _rows) 
+            {
+                let currentColumn = _columns[i];
+                do Memory.dealloc(currentColumn[j]);
+                let j = j + 1;
+            }
             let i = i + 1;
         }
+        
         do Memory.deAlloc(_columns);
+        do Memory.deAlloc(currentColumn);
+        do Memory.deAlloc(this);
         return;
     }
 }
