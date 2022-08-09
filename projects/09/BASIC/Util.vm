@@ -1,0 +1,20 @@
+function Util.lowerCaseChar 1
+push argument 0
+push constant 64
+gt
+push argument 0
+push constant 91
+lt
+and
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+push constant 32
+add
+return
+goto IF_END0
+label IF_FALSE0
+push argument 0
+return
+label IF_END0

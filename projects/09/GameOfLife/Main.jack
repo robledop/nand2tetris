@@ -1,0 +1,25 @@
+class Main 
+{
+    function void main () 
+    {
+        var Board board;
+        var int rand;
+        let board = Board.new(16, 16, 1, true);
+
+        do board.randomize();
+
+        while(true)
+        {
+            do board.draw();
+            do board.advance();
+            if (Keyboard.keyPressed() = 79) 
+            {
+                do board.randomize();
+            }
+        }
+
+        do board.dispose();
+
+        return;
+    }
+}

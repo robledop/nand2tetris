@@ -6,9 +6,12 @@
 /** Hello World program. */
 class Main {
    function void main() {
+      //var char x;
       /* Prints some text using the standard library. */
       do Output.printString("Hello world!");
       do Output.println();      // New line
+
+      do Keyboard.readChar();
       return;
    }
 }

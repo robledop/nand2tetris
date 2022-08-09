@@ -1,0 +1,53 @@
+class Shell 
+{
+    field String prompt;
+
+    constructor Shell new()
+    {
+        let prompt = ">";
+        return this;
+    }
+
+    method void run()
+    {
+        var String line;
+
+        let line = "LIMITED BASIC INTERPRETER";
+        do Output.printString(line);
+        do line.dispose();
+        do Display.newline(false);
+        let line = "Type 'help' to display available commands";
+        do Output.printString(line);
+        do line.dispose();
+        do Display.newline(false);
+        let line = "READY";
+        do Output.printString(line);
+        do line.dispose();
+        do Display.newline(false);
+        do Display.newline(true);
+        do Display.printString(prompt);
+        
+        let line = Display.readLine();
+        while (~(line = "quit"))
+        {
+            do line.dispose();
+            do Display.printString(prompt);
+            let line = Display.readLine();
+            if (line = "cls") 
+            {
+                do Display.printString("true");
+                do Display.clear();
+            }
+        }
+        
+        return;
+    }
+
+    method void dispose() 
+    {
+        do prompt.dispose();
+        do Memory.deAlloc(this);
+        do Display.printString("done");
+        return;
+    }
+}

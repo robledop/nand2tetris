@@ -1,0 +1,281 @@
+class Board
+{
+    field int _cellSize;
+    field int _rows;
+    field int _numberOfColumns;
+    field Array _columns;
+    
+    constructor Board new(int width, int height, int cellSize, boolean wrap)
+    {
+        var int i, j;
+        var Array currentColumn;
+
+        let _numberOfColumns = width / cellSize;
+        let _rows = height / cellSize;
+        let _cellSize = cellSize;
+        let _columns = Array.new(_numberOfColumns);
+
+        let i = 0;
+        while (i < _rows) 
+        {
+            let _columns[i] = Array.new(_rows);
+            let i = i + 1;
+        }
+
+        let i = 0;
+        while(i < _numberOfColumns)
+        {
+            let j = 0;
+            let currentColumn = _columns[i];
+            while(j < _rows)
+            {
+                let currentColumn[j] = Cell.new();
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        do connectNeighbors(wrap);
+
+        return this;
+    }
+
+
+    method void connectNeighbors(boolean wrap)
+    {
+        var Array currentColumn;
+        var Cell currentCell;
+        var String message;
+
+        var Array columnToAdd;
+        var Cell cellToAdd;
+        var boolean isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isEdge;
+        var int xL, xR, yT, yB;
+
+        var int i;
+        var int j;
+        let i = 0;
+        
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _rows) 
+            {
+                let isLeftEdge = (i = 0);
+                let isRightEdge = (i = (_numberOfColumns - 1));
+                let isTopEdge = (j = 0);
+                let isBottomEdge = (j = (_rows - 1));
+                let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
+                
+                if (~isEdge)
+                {
+                    if (isLeftEdge) 
+                    {
+                        let xL = (_numberOfColumns - 1);
+                    }
+                    else
+                    {
+                        let xL = (i - 1);
+                    }
+
+                    if (isRightEdge) 
+                    {
+                        let xR = 0;
+                    }
+                    else
+                    {
+                        let xR = (i + 1);
+                    }
+
+                    if (isTopEdge) 
+                    {
+                        let yT = (_rows - 1);
+                    }
+                    else
+                    {
+                        let yT = (j - 1);
+                    }
+
+                    if (isBottomEdge) 
+                    {
+                        let yB = 0;
+                    }
+                    else
+                    {
+                        let yB = (j + 1);
+                    }
+
+                    let currentColumn = _columns[i];
+                    let currentCell = currentColumn[j];
+                    
+                    let columnToAdd = _columns[xL];
+                    let cellToAdd = columnToAdd[yT];
+                    do currentCell.setNeighbor(0, cellToAdd);
+
+                    let columnToAdd = _columns[i];
+                    let cellToAdd = columnToAdd[yT];
+                    do currentCell.setNeighbor(1, cellToAdd);
+
+                    let columnToAdd = _columns[xR];
+                    let cellToAdd = columnToAdd[yT];
+                    do currentCell.setNeighbor(2, cellToAdd);
+
+                    let columnToAdd = _columns[xL];
+                    let cellToAdd = columnToAdd[j];
+                    do currentCell.setNeighbor(3, cellToAdd);
+
+                    let columnToAdd = _columns[xR];
+                    let cellToAdd = columnToAdd[j];
+                    do currentCell.setNeighbor(4, cellToAdd);
+
+                    let columnToAdd = _columns[xL];
+                    let cellToAdd = columnToAdd[yB];
+                    do currentCell.setNeighbor(5, cellToAdd);
+
+                    let columnToAdd = _columns[i];
+                    let cellToAdd = columnToAdd[yB];
+                    do currentCell.setNeighbor(6, cellToAdd);
+
+                    let columnToAdd = _columns[xR];
+                    let cellToAdd = columnToAdd[yB];
+                    do currentCell.setNeighbor(7, cellToAdd);
+
+                }
+
+                let j = j + 1;
+            }
+
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    method void draw() 
+    {
+        var int i, j;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let i = 0;
+        while(i < _numberOfColumns)
+        {
+            let j = 0;
+            while(j < _rows)
+            {
+                let currentColumn = _columns[i];
+                let currentCell = currentColumn[j];
+                do drawCell(i, j, currentCell.getIsAlive());
+                let j = j + 1;
+            }
+
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    method void drawCell(int x, int y, boolean color) 
+    {
+        do Screen.setColor(color);
+        do Screen.drawRectangle(255+(x*16), (y*16), 255+(x*16)+14, 14+(y*16));
+        return;
+    }
+
+    method void randomize()
+    {
+        var int rand, i, j;
+        var boolean isAlive;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let rand = Random.rand();
+        do Random.setSeed(rand);
+
+        let i = 0;
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _rows) 
+            {
+                let currentColumn = _columns[i];
+                let currentCell = currentColumn[j];
+
+                do Random.setSeed(rand);
+                let rand = Random.rand();
+                let isAlive = (rand < 15000);
+
+                do currentCell.setIsAlive(isAlive);
+
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+
+        return;
+    }
+
+
+    method void advance()
+    {
+        var int i, j;
+        var Array currentColumn;
+        var Cell currentCell;
+        var boolean isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isEdge;
+        
+
+        let i = 0;
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _rows) 
+            {
+                let isLeftEdge = (i = 0);
+                let isRightEdge = (i = (_numberOfColumns - 1));
+                let isTopEdge = (j = 0);
+                let isBottomEdge = (j = (_rows - 1));
+                let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
+                
+                if(~isEdge)
+                {
+                    let currentColumn = _columns[i];
+                    let currentCell = currentColumn[j];
+                    do currentCell.determineNextLiveState();
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        let i = 0;    
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _rows) 
+            {
+                let currentColumn = _columns[i];
+                let currentCell = currentColumn[j];
+                do currentCell.advance();
+                let j = j+1;
+            }
+            let i = i+1;
+        }
+
+        return;
+    }
+
+    method void dispose() 
+    {
+        var int i;
+        do Memory.deAlloc(this);
+        let i = 0;
+        while (i < _rows) 
+        {
+            do Memory.deAlloc(_columns[i]);
+            let i = i + 1;
+        }
+        do Memory.deAlloc(_columns);
+        return;
+    }
+}

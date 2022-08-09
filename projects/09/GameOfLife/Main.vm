@@ -1,0 +1,39 @@
+function Main.main 2
+push constant 16
+push constant 16
+push constant 1
+push constant 0
+not
+call Board.new 4
+pop local 0
+push local 0
+call Board.randomize 1
+pop temp 0
+label WHILE_EXP0
+push constant 0
+not
+not
+if-goto WHILE_END0
+push local 0
+call Board.draw 1
+pop temp 0
+push local 0
+call Board.advance 1
+pop temp 0
+call Keyboard.keyPressed 0
+push constant 79
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+call Board.randomize 1
+pop temp 0
+label IF_FALSE0
+goto WHILE_EXP0
+label WHILE_END0
+push local 0
+call Board.dispose 1
+pop temp 0
+push constant 0
+return

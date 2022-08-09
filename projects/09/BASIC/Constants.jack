@@ -1,0 +1,32 @@
+class Constants
+{
+    function integer SCREEN_HEIGHT() 
+    {
+        return 23;
+    }
+
+    function integer SCREEN_WIDTH()
+    {
+        return 64;
+    }
+
+    function integer MAX_LINE() 
+    {
+        return Constants.SCREEN_WIDTH() * Constants.SCREEN_HEIGHT();
+    }
+
+    function integer SCREEN() 
+    {
+        return 16384;
+    }
+
+    function integer CHAR_HEIGHT() 
+    {
+        return 11;
+    }
+
+    function integer CHAR_WIDTH() 
+    {
+        return 8;
+    }
+}

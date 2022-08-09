@@ -1,0 +1,76 @@
+class Cell 
+{
+  field boolean _isAlive;
+  field boolean _isAliveNext;
+  field Array _neighbors;
+  
+  method boolean getIsAlive() 
+  {
+    return _isAlive;
+  }
+
+  method boolean getIsAliveNext() 
+  {
+    return _isAliveNext;
+  }
+
+  constructor Cell new()
+  {
+    let _neighbors = Array.new(8);
+    return this;
+  }
+
+  method void setIsAlive(boolean isAlive) 
+  {
+    let _isAlive = isAlive;
+    return;
+  }
+
+  method void setNeighbor(int index, Cell neighbor)
+  {
+    let _neighbors[index] = neighbor;
+    return;
+  }
+
+  method void determineNextLiveState()
+  {
+    var Cell currentNeighbor;
+    var int liveNeighbors, i;
+    
+    let liveNeighbors = 0;
+    let i = 0;
+    while(i < 8)
+    {
+      let currentNeighbor = _neighbors[i];
+      if(currentNeighbor.getIsAlive())
+      {
+        let liveNeighbors = liveNeighbors + 1;
+      }
+      let i = i + 1;
+    }
+
+    if (_isAlive)
+    {
+      let _isAliveNext = ((liveNeighbors = 2) | (liveNeighbors = 3));
+    }
+    else
+    {
+      let _isAliveNext = (liveNeighbors = 3);
+    }
+
+    return;
+  }
+
+  method void advance()
+  {
+    let _isAlive = _isAliveNext;
+    return;
+  }
+
+  method void dispose() 
+  {
+    do Memory.deAlloc(_neighbors);
+    do Memory.deAlloc(this);
+    return;
+  }
+}

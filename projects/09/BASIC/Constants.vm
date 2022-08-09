@@ -1,0 +1,20 @@
+function Constants.SCREEN_HEIGHT 0
+push constant 23
+return
+function Constants.SCREEN_WIDTH 0
+push constant 64
+return
+function Constants.MAX_LINE 0
+call Constants.SCREEN_WIDTH 0
+call Constants.SCREEN_HEIGHT 0
+call Math.multiply 2
+return
+function Constants.SCREEN 0
+push constant 16384
+return
+function Constants.CHAR_HEIGHT 0
+push constant 11
+return
+function Constants.CHAR_WIDTH 0
+push constant 8
+return
