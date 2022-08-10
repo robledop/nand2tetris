@@ -1,38 +1,80 @@
-function Main.main 2
-push constant 16
+function Main.main 3
+push constant 19
 push constant 16
 push constant 1
 push constant 0
 not
 call Board.new 4
-pop local 0
-push local 0
+pop local 1
+push local 1
 call Board.randomize 1
 pop temp 0
+call StartScreen.drawMenu 0
+pop temp 0
 label WHILE_EXP0
-push constant 0
+push local 0
 not
 not
 if-goto WHILE_END0
-push local 0
+push local 1
 call Board.draw 1
 pop temp 0
-push local 0
+push local 1
 call Board.advance 1
 pop temp 0
 call Keyboard.keyPressed 0
-push constant 79
+push constant 82
 eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push local 0
+push local 1
 call Board.randomize 1
 pop temp 0
 label IF_FALSE0
+call Keyboard.keyPressed 0
+push constant 71
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 1
+call Board.createGlider 1
+pop temp 0
+label IF_FALSE1
+call Keyboard.keyPressed 0
+push constant 80
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 1
+call Board.createPulsar 1
+pop temp 0
+label IF_FALSE2
+call Keyboard.keyPressed 0
+push constant 72
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 1
+call Board.createHeavyweightSpaceship 1
+pop temp 0
+label IF_FALSE3
+call Keyboard.keyPressed 0
+push constant 81
+eq
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 0
+not
+pop local 0
+label IF_FALSE4
 goto WHILE_EXP0
 label WHILE_END0
-push local 0
+push local 1
 call Board.dispose 1
 pop temp 0
 push constant 0

@@ -2,19 +2,41 @@ class Main
 {
     function void main () 
     {
+        var boolean quit;
         var Board board;
         var int rand;
-        let board = Board.new(16, 16, 1, true);
+        let board = Board.new(19, 16, 1, true);
 
         do board.randomize();
+        do StartScreen.drawMenu();
 
-        while(true)
+        while(~quit)
         {
             do board.draw();
             do board.advance();
-            if (Keyboard.keyPressed() = 79) 
+            if (Keyboard.keyPressed() = 82) // R key 
             {
                 do board.randomize();
+            }
+            
+            if (Keyboard.keyPressed() = 71) // G key 
+            {
+                do board.createGlider();
+            }
+
+            if (Keyboard.keyPressed() = 80) // P key 
+            {
+                do board.createPulsar();
+            }
+
+            if (Keyboard.keyPressed() = 72) // H key 
+            {
+                do board.createHeavyweightSpaceship();
+            }
+
+            if (Keyboard.keyPressed() = 81) // Q key
+            { 
+                let quit = true; 
             }
         }
 
