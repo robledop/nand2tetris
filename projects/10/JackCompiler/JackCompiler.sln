@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompiler", "JackCompiler\JackCompiler.csproj", "{547797C4-C696-4C62-A23B-2AB98F37671C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompiler.Tests", "JackCompiler.Tests\JackCompiler.Tests.csproj", "{EFD52C3F-F8E1-4222-9689-17921ED0502C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{547797C4-C696-4C62-A23B-2AB98F37671C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{547797C4-C696-4C62-A23B-2AB98F37671C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{547797C4-C696-4C62-A23B-2AB98F37671C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{547797C4-C696-4C62-A23B-2AB98F37671C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFD52C3F-F8E1-4222-9689-17921ED0502C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFD52C3F-F8E1-4222-9689-17921ED0502C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFD52C3F-F8E1-4222-9689-17921ED0502C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFD52C3F-F8E1-4222-9689-17921ED0502C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70F910DD-3B41-460E-869F-F5CC5D22684B}
+	EndGlobalSection
+EndGlobal
