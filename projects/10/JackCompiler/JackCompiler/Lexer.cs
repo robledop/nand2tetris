@@ -79,25 +79,25 @@ namespace JackCompiler
             // Get symbol
             switch (_lastChar)
             {
-                case '{': GetChar(); return new Token(null, TokenType.LeftCurlyBracket, _tokenMarker);
-                case '}': GetChar(); return new Token(null, TokenType.RightCurlyBracket, _tokenMarker);
-                case '(': GetChar(); return new Token(null, TokenType.LeftParenthesis, _tokenMarker);
-                case ')': GetChar(); return new Token(null, TokenType.RightParenthesis, _tokenMarker);
-                case '[': GetChar(); return new Token(null, TokenType.LeftSquareBracket, _tokenMarker);
-                case ']': GetChar(); return new Token(null, TokenType.RightSquareBracket, _tokenMarker);
-                case '.': GetChar(); return new Token(null, TokenType.Period, _tokenMarker);
-                case ',': GetChar(); return new Token(null, TokenType.Comma, _tokenMarker);
-                case ';': GetChar(); return new Token(null, TokenType.SemiColon, _tokenMarker);
-                case '+': GetChar(); return new Token(null, TokenType.Plus, _tokenMarker);
-                case '-': GetChar(); return new Token(null, TokenType.Minus, _tokenMarker);
-                case '*': GetChar(); return new Token(null, TokenType.Multiply, _tokenMarker);
-                case '/': GetChar(); return new Token(null, TokenType.Divide, _tokenMarker);
-                case '&': GetChar(); return new Token(null, TokenType.And, _tokenMarker);
-                case '|': GetChar(); return new Token(null, TokenType.Or, _tokenMarker);
-                case '<': GetChar(); return new Token(null, TokenType.LesserThan, _tokenMarker);
-                case '>': GetChar(); return new Token(null, TokenType.GreaterThan, _tokenMarker);
-                case '=': GetChar(); return new Token(null, TokenType.Equal, _tokenMarker);
-                case '~': GetChar(); return new Token(null, TokenType.Not, _tokenMarker);
+                case '{': GetChar(); return new Token("{", TokenType.LeftCurlyBracket, _tokenMarker);
+                case '}': GetChar(); return new Token("}", TokenType.RightCurlyBracket, _tokenMarker);
+                case '(': GetChar(); return new Token("(", TokenType.LeftParenthesis, _tokenMarker);
+                case ')': GetChar(); return new Token(")", TokenType.RightParenthesis, _tokenMarker);
+                case '[': GetChar(); return new Token("[", TokenType.LeftSquareBracket, _tokenMarker);
+                case ']': GetChar(); return new Token("]", TokenType.RightSquareBracket, _tokenMarker);
+                case '.': GetChar(); return new Token(".", TokenType.Period, _tokenMarker);
+                case ',': GetChar(); return new Token(",", TokenType.Comma, _tokenMarker);
+                case ';': GetChar(); return new Token(";", TokenType.SemiColon, _tokenMarker);
+                case '+': GetChar(); return new Token("+", TokenType.Plus, _tokenMarker);
+                case '-': GetChar(); return new Token("-", TokenType.Minus, _tokenMarker);
+                case '*': GetChar(); return new Token("*", TokenType.Multiply, _tokenMarker);
+                case '/': GetChar(); return new Token("/", TokenType.Divide, _tokenMarker);
+                case '&': GetChar(); return new Token("&", TokenType.And, _tokenMarker);
+                case '|': GetChar(); return new Token("|", TokenType.Or, _tokenMarker);
+                case '<': GetChar(); return new Token("<", TokenType.LesserThan, _tokenMarker);
+                case '>': GetChar(); return new Token(">", TokenType.GreaterThan, _tokenMarker);
+                case '=': GetChar(); return new Token("=", TokenType.Equal, _tokenMarker);
+                case '~': GetChar(); return new Token("~", TokenType.Not, _tokenMarker);
             }
 
             if (_lastChar == '"')
@@ -153,26 +153,26 @@ namespace JackCompiler
         {
             return _lastToken switch
             {
-                "class" => new Token(null, TokenType.Class, _tokenMarker),
-                "constructor" => new Token(null, TokenType.Constructor, _tokenMarker),
-                "function" => new Token(null, TokenType.Function, _tokenMarker),
-                "method" => new Token(null, TokenType.Method, _tokenMarker),
-                "field" => new Token(null, TokenType.Field, _tokenMarker),
-                "static" => new Token(null, TokenType.Static, _tokenMarker),
-                "var" => new Token(null, TokenType.Var, _tokenMarker),
-                "int" => new Token(null, TokenType.Int, _tokenMarker),
-                "char" => new Token(null, TokenType.Char, _tokenMarker),
-                "boolean" => new Token(null, TokenType.Boolean, _tokenMarker),
-                "void" => new Token(null, TokenType.Void, _tokenMarker),
-                "true" => new Token(null, TokenType.True, _tokenMarker),
-                "false" => new Token(null, TokenType.False, _tokenMarker),
-                "this" => new Token(null, TokenType.This, _tokenMarker),
-                "let" => new Token(null, TokenType.Let, _tokenMarker),
-                "do" => new Token(null, TokenType.Do, _tokenMarker),
-                "if" => new Token(null, TokenType.If, _tokenMarker),
-                "else" => new Token(null, TokenType.Else, _tokenMarker),
-                "while" => new Token(null, TokenType.While, _tokenMarker),
-                "return" => new Token(null, TokenType.Return, _tokenMarker),
+                "class" => new Token("class", TokenType.Class, _tokenMarker),
+                "constructor" => new Token("constructor", TokenType.Constructor, _tokenMarker),
+                "function" => new Token("function", TokenType.Function, _tokenMarker),
+                "method" => new Token("method", TokenType.Method, _tokenMarker),
+                "field" => new Token("field", TokenType.Field, _tokenMarker),
+                "static" => new Token("static", TokenType.Static, _tokenMarker),
+                "var" => new Token("var", TokenType.Var, _tokenMarker),
+                "int" => new Token("int", TokenType.Int, _tokenMarker),
+                "char" => new Token("char", TokenType.Char, _tokenMarker),
+                "boolean" => new Token("boolean", TokenType.Boolean, _tokenMarker),
+                "void" => new Token("void", TokenType.Void, _tokenMarker),
+                "true" => new Token("true", TokenType.True, _tokenMarker),
+                "false" => new Token("false", TokenType.False, _tokenMarker),
+                "this" => new Token("this", TokenType.This, _tokenMarker),
+                "let" => new Token("let", TokenType.Let, _tokenMarker),
+                "do" => new Token("do", TokenType.Do, _tokenMarker),
+                "if" => new Token("if", TokenType.If, _tokenMarker),
+                "else" => new Token("else", TokenType.Else, _tokenMarker),
+                "while" => new Token("while", TokenType.While, _tokenMarker),
+                "return" => new Token("return", TokenType.Return, _tokenMarker),
                 _ => new Token(_lastToken, TokenType.Identifier, _tokenMarker)
             };
         }
