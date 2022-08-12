@@ -1,0 +1,525 @@
+class Board
+{
+    field boolean _wrap;
+    field int _numberOfRows;
+    field int _numberOfColumns;
+    field Array _columns;
+    
+    // Initializes the board. It uses an array of arrays to represent the board.
+    // Then each sub-array is filled with Cell objects.
+    constructor Board new(int width, int height, int cellSize, boolean wrap)
+    {
+        var int i, j;
+        var Array currentColumn;
+
+        let _wrap = wrap;
+        let _numberOfColumns = (width / cellSize);
+        let _numberOfRows = (height / cellSize);
+        let _columns = Array.new(_numberOfColumns);
+
+        let i = 0;
+        while (i < _numberOfColumns) 
+        {
+            let _columns[i] = Array.new(_numberOfRows);
+            let i = i + 1;
+        }
+
+        let i = 0;
+        while(i < _numberOfColumns)
+        {
+            let j = 0;
+            let currentColumn = _columns[i];
+            while(j < _numberOfRows)
+            {
+                let currentColumn[j] = Cell.new();
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        do connectNeighbors();
+
+        return this;
+    }
+
+    
+    /** Connects the neighbors of each cell.
+        Each cell has 8 neighbors. 
+        If 'wrap' is true, the board has no borders, they will wrap around */
+    method void connectNeighbors()
+    {
+        var Array currentColumn;
+        var Cell currentCell;
+        var String message;
+
+        var Array columnToAdd;
+        var Cell cellToAdd;
+        var boolean isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isEdge;
+        var int colLeft, colRight, rowTop, rowBottom;
+
+        var int col;
+        var int row;
+        let col = 0;
+        
+        while (col < _numberOfColumns) 
+        {
+            let row = 0;
+            while (row < _numberOfRows) 
+            {
+                let isLeftEdge = (col = 0);
+                let isRightEdge = (col = (_numberOfColumns - 1));
+                let isTopEdge = (row = 0);
+                let isBottomEdge = (row = (_numberOfRows - 1));
+                let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
+                
+                if (_wrap | ~isEdge)
+                {
+                    if (isLeftEdge) 
+                    {
+                        let colLeft = (_numberOfColumns - 1);
+                    }
+                    else
+                    {
+                        let colLeft = (col - 1);
+                    }
+
+                    if (isRightEdge) 
+                    {
+                        let colRight = 0;
+                    }
+                    else
+                    {
+                        let colRight = (col + 1);
+                    }
+
+                    if (isTopEdge) 
+                    {
+                        let rowTop = (_numberOfRows - 1);
+                    }
+                    else
+                    {
+                        let rowTop = (row - 1);
+                    }
+
+                    if (isBottomEdge) 
+                    {
+                        let rowBottom = 0;
+                    }
+                    else
+                    {
+                        let rowBottom = (row + 1);
+                    }
+
+                    let currentColumn = _columns[col];
+                    let currentCell = currentColumn[row];
+                    
+                    let columnToAdd = _columns[colLeft];
+                    let cellToAdd = columnToAdd[rowTop];
+                    do currentCell.setNeighbor(0, cellToAdd);
+
+                    let columnToAdd = _columns[col];
+                    let cellToAdd = columnToAdd[rowTop];
+                    do currentCell.setNeighbor(1, cellToAdd);
+
+                    let columnToAdd = _columns[colRight];
+                    let cellToAdd = columnToAdd[rowTop];
+                    do currentCell.setNeighbor(2, cellToAdd);
+
+                    let columnToAdd = _columns[colLeft];
+                    let cellToAdd = columnToAdd[row];
+                    do currentCell.setNeighbor(3, cellToAdd);
+
+                    let columnToAdd = _columns[colRight];
+                    let cellToAdd = columnToAdd[row];
+                    do currentCell.setNeighbor(4, cellToAdd);
+
+                    let columnToAdd = _columns[colLeft];
+                    let cellToAdd = columnToAdd[rowBottom];
+                    do currentCell.setNeighbor(5, cellToAdd);
+
+                    let columnToAdd = _columns[col];
+                    let cellToAdd = columnToAdd[rowBottom];
+                    do currentCell.setNeighbor(6, cellToAdd);
+
+                    let columnToAdd = _columns[colRight];
+                    let cellToAdd = columnToAdd[rowBottom];
+                    do currentCell.setNeighbor(7, cellToAdd);
+
+                }
+
+                let row = row + 1;
+            }
+
+            let col = col + 1;
+        }
+
+        return;
+    }
+
+    // Draw all cells that are currently alive
+    method void draw() 
+    {
+        var int col, row;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let col = 0;
+        while(col < _numberOfColumns)
+        {
+            let row = 0;
+            while(row < _numberOfRows)
+            {
+                let currentColumn = _columns[col];
+                let currentCell = currentColumn[row];
+                do drawCell(col, row, currentCell.getIsAlive());
+                let row = row + 1;
+            }
+
+            let col = col + 1;
+        }
+
+        return;
+    }
+
+    method void drawCell(int x, int y, boolean color) 
+    {
+        do Screen.setColor(color);
+
+        // Each cell is 14x14 pixels with 2 pixels of padding on each side (16 - 14), 
+        // and they start to be drawn after 202 pixels to the right
+        do Screen.drawRectangle(202+(x*16), (y*16), 202+(x*16)+14, 14+(y*16));
+        return;
+    }
+
+    // Sets each cell to be alive or dead in a pseudo-random manner.
+    method void randomize()
+    {
+        var int rand, col, row;
+        var boolean isAlive;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let rand = Random.rand();
+        do Random.setSeed(rand);
+
+        let col = 0;
+        while (col < _numberOfColumns) 
+        {
+            let row = 0;
+            while (row < _numberOfRows) 
+            {
+                let currentColumn = _columns[col];
+                let currentCell = currentColumn[row];
+
+                do Random.setSeed(rand);
+                let rand = Random.rand();
+                let isAlive = (rand < 15000);
+
+                do currentCell.setIsAlive(isAlive);
+
+                let row = row + 1;
+            }
+            let col = col + 1;
+        }
+        
+        return;
+    }
+
+    // Creates a glider
+    // https://conwaylife.com/wiki/Glider
+    // 0 1 2 3 4
+    // - - - - - 0
+    // - - - ▀ - 1
+    // - ▀ - ▀ - 2
+    // - - ▀ ▀ - 3
+    // - - - - - 4
+     method void createGlider()
+    {
+        var int col, row;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let col = 0;
+        while (col < _numberOfColumns) 
+        {
+            let row = 0;
+            while (row < _numberOfRows) 
+            {
+                let currentColumn = _columns[col];
+                let currentCell = currentColumn[row];
+
+                if (((col = 3) & (row = 1)) |
+                    ((col = 1) & (row = 2)) |
+                    ((col = 3) & (row = 2)) |
+                    ((col = 2) & (row = 3)) |
+                    ((col = 3) & (row = 3))) 
+                {
+                    do currentCell.setIsAlive(true);    
+                }
+                else
+                {
+                    do currentCell.setIsAlive(false);    
+                }
+
+                let row = row + 1;
+            }
+            let col = col + 1;
+        }
+        
+        return;
+    }
+
+    // Creates a pulsar
+    // https://conwaylife.com/wiki/Pulsar
+    //                     1 1 1 1 1 1 1 1 1
+    // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8
+    // - - - - - - - - - - - - - - - - - - - 0
+    // - - - - - ▀ ▀ ▀ - - - ▀ ▀ ▀ - - - - - 1
+    // - - - - - - - - - - - - - - - - - - - 2
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 3
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 4
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 5
+    // - - - - - ▀ ▀ ▀ - - - ▀ ▀ ▀ - - - - - 6
+    // - - - - - - - - - - - - - - - - - - - 7
+    // - - - - - ▀ ▀ ▀ - - - ▀ ▀ ▀ - - - - - 8
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 9
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 10
+    // - - - ▀ - - - - ▀ - ▀ - - - - ▀ - - - 11
+    // - - - - - - - - - - - - - - - - - - - 12
+    // - - - - - ▀ ▀ ▀ - - - ▀ ▀ ▀ - - - - - 13
+    // - - - - - - - - - - - - - - - - - - - 14
+    method void createPulsar()
+    {
+       var int col, row;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let col = 0;
+        while (col < _numberOfColumns) 
+        {
+            let row = 0;
+            while (row < _numberOfRows) 
+            {
+                let currentColumn = _columns[col];
+                let currentCell = currentColumn[row];
+
+                if (((col = 5) & (row = 1)) |
+                    ((col = 6) & (row = 1)) |
+                    ((col = 7) & (row = 1)) |
+
+                    ((col = 11) & (row = 1)) |
+                    ((col = 12) & (row = 1)) |
+                    ((col = 13) & (row = 1)) |
+
+                    ((col = 5) & (row = 6)) |
+                    ((col = 6) & (row = 6)) |
+                    ((col = 7) & (row = 6)) |
+
+                    ((col = 11) & (row = 6)) |
+                    ((col = 12) & (row = 6)) |
+                    ((col = 13) & (row = 6)) |
+                    
+                    ((col = 5) & (row = 8)) |
+                    ((col = 6) & (row = 8)) |
+                    ((col = 7) & (row = 8)) |
+
+                    ((col = 11) & (row = 8)) |
+                    ((col = 12) & (row = 8)) |
+                    ((col = 13) & (row = 8)) |
+
+                    ((col = 5) & (row = 13)) |
+                    ((col = 6) & (row = 13)) |
+                    ((col = 7) & (row = 13)) |
+
+                    ((col = 11) & (row = 13)) |
+                    ((col = 12) & (row = 13)) |
+                    ((col = 13) & (row = 13)) |
+
+                    ((col = 3) & (row = 3)) |
+                    ((col = 3) & (row = 4)) |
+                    ((col = 3) & (row = 5)) |
+
+                    ((col = 8) & (row = 3)) |
+                    ((col = 8) & (row = 4)) |
+                    ((col = 8) & (row = 5)) |
+
+                    ((col = 3) & (row = 9))  |
+                    ((col = 3) & (row = 10)) |
+                    ((col = 3) & (row = 11)) |
+
+                    ((col = 8) & (row = 9))  |
+                    ((col = 8) & (row = 10)) |
+                    ((col = 8) & (row = 11)) |
+
+                    ((col = 10) & (row = 9))  |
+                    ((col = 10) & (row = 10)) |
+                    ((col = 10) & (row = 11)) |
+
+                    ((col = 15) & (row = 3)) |
+                    ((col = 15) & (row = 4)) |
+                    ((col = 15) & (row = 5)) |
+
+                    ((col = 10) & (row = 3)) |
+                    ((col = 10) & (row = 4)) |
+                    ((col = 10) & (row = 5)) |
+
+                    ((col = 15) & (row = 9))  |
+                    ((col = 15) & (row = 10)) |
+                    ((col = 15) & (row = 11))) 
+                {
+                    do currentCell.setIsAlive(true);    
+                }
+                else
+                {
+                    do currentCell.setIsAlive(false);    
+                }
+
+                let row = row + 1;
+            }
+            let col = col + 1;
+        }
+        
+        return;
+    }
+
+    // Creates a heavy-weight spaceship
+    // https://conwaylife.com/wiki/Heavyweight_spaceship
+    //                     1 1 1 1 1 1 1 1 1
+    // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8
+    // - - - - - - - - - - - - - - - - - - - 0
+    // - - - - - - - - - - - - - - - - - - - 1
+    // - - - - - - - - - - - - - - - - - - - 2
+    // - - - - - - - - - - - - - - - - - - - 3
+    // - - - - - - - - - - - - - - - - - - - 4
+    // - - - - - - - - ▀ ▀ - - - - - - - - - 5
+    // - - - - - - - ▀ ▀ - ▀ ▀ ▀ ▀ - - - - - 6
+    // - - - - - - - - ▀ ▀ ▀ ▀ ▀ ▀ - - - - - 7
+    // - - - - - - - - - ▀ ▀ ▀ ▀ - - - - - - 8
+    // - - - - - - - - - - - - - - - - - - - 9
+    // - - - - - - - - - - - - - - - - - - - 10
+    // - - - - - - - - - - - - - - - - - - - 11
+    // - - - - - - - - - - - - - - - - - - - 12
+    // - - - - - - - - - - - - - - - - - - - 13
+    // - - - - - - - - - - - - - - - - - - - 14
+     method void createHeavyweightSpaceship()
+    {
+        var int col, row;
+        var Array currentColumn;
+        var Cell currentCell;
+
+        let col = 0;
+        while (col < _numberOfColumns) 
+        {
+            let row = 0;
+            while (row < _numberOfRows) 
+            {
+                let currentColumn = _columns[col];
+                let currentCell = currentColumn[row];
+
+                if (((col = 8) & (row = 5)) |
+                    ((col = 9) & (row = 5)) |
+                    ((col = 7) & (row = 6)) |
+                    ((col = 8) & (row = 6)) |
+                    ((col = 10) & (row = 6)) |
+                    ((col = 11) & (row = 6)) |
+                    ((col = 12) & (row = 6)) |
+                    ((col = 13) & (row = 6)) |
+                    ((col = 8) & (row = 7)) |
+                    ((col = 9) & (row = 7)) |
+                    ((col = 10) & (row = 7)) |
+                    ((col = 11) & (row = 7)) |
+                    ((col = 12) & (row = 7)) |
+                    ((col = 13) & (row = 7)) |
+                    ((col = 9) & (row = 8)) |
+                    ((col = 10) & (row = 8)) |
+                    ((col = 11) & (row = 8)) |
+                    ((col = 12) & (row = 8))) 
+                {
+                    do currentCell.setIsAlive(true);    
+                }
+                else
+                {
+                    do currentCell.setIsAlive(false);    
+                }
+
+                let row = row + 1;
+            }
+            let col = col + 1;
+        }
+        
+        return;
+    }
+
+    // Advances the game one generation
+    method void advance()
+    {
+        var int i, j;
+        var Array currentColumn;
+        var Cell currentCell;
+        var boolean isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isEdge;
+
+        let i = 0;
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _numberOfRows) 
+            {
+                let isLeftEdge = (i = 0);
+                let isRightEdge = (i = (_numberOfColumns - 1));
+                let isTopEdge = (j = 0);
+                let isBottomEdge = (j = (_numberOfRows - 1));
+                let isEdge = (isLeftEdge | isRightEdge | isTopEdge | isBottomEdge);
+                
+                if (_wrap | ~isEdge)
+                {
+                    let currentColumn = _columns[i];
+                    let currentCell = currentColumn[j];
+                    do currentCell.determineNextLiveState();
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        let i = 0;    
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _numberOfRows) 
+            {
+                let currentColumn = _columns[i];
+                let currentCell = currentColumn[j];
+                do currentCell.advance();
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    method void dispose() 
+    {
+        var Array currentColumn;
+        var Cell currentCell;
+        var int i, j;
+        let i = 0;    
+        while (i < _numberOfColumns) 
+        {
+            let j = 0;
+            while (j < _numberOfRows) 
+            {
+                let currentColumn = _columns[i];
+                let currentCell = currentColumn[j];
+                do currentCell.dispose();
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        
+        do Memory.deAlloc(_columns);
+        do Memory.deAlloc(currentColumn);
+        do Memory.deAlloc(this);
+        return;
+    }
+}

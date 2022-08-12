@@ -27,11 +27,6 @@ namespace JackCompiler
             return Regex.Replace(source, re, "$1");
         }
 
-        public void GoTo(Marker marker)
-        {
-            _sourceMarker = marker;
-        }
-
         char GetChar()
         {
             _sourceMarker.Column++;

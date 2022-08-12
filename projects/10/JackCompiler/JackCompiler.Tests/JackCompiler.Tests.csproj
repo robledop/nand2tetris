@@ -63,6 +63,21 @@
     <None Update="TestSource\ExpressionLessSquare\SquareT.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestSource\GameOfLife\Board.jack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestSource\GameOfLife\Cell.jack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestSource\GameOfLife\Main.jack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestSource\GameOfLife\Random.jack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestSource\GameOfLife\StartScreen.jack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestSource\Square\Main.jack">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

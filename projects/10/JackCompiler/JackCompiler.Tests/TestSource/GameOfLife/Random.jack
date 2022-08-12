@@ -1,0 +1,21 @@
+class Random 
+{
+    static int seed;
+    
+    function void setSeed(int newSeed) 
+    {
+        let seed = newSeed;
+        return;
+    }
+
+    // returns a pseudo-random number between 0 and 32767
+    function int rand() 
+    {
+        let seed = seed + 20251;
+        if (seed < 0) 
+        {
+            let seed = seed - 32767 - 1;
+        }
+        return seed;
+    }
+}
