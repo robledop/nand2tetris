@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using JackCompiler.Exceptions;
 
 namespace JackCompiler
 {
@@ -11,40 +13,23 @@ namespace JackCompiler
         Marker _tokenMarker;
         char _lastChar;
         string _lastToken;
-        Constant _constant;
 
         public Lexer(string source)
         {
-            _source = source;
+            _source = StripComments(source);
             _sourceMarker = new Marker(0, 1, 1);
             _lastChar = _source.First();
+        }
 
-
+        static string StripComments(string source)
+        {
+            var re = @"(@(?:""[^""]*"")+|""(?:[^""\n\\]+|\\.)*""|'(?:[^'\n\\]+|\\.)*')|//.*|/\*(?s:.*?)\*/";
+            return Regex.Replace(source, re, "$1");
         }
 
         public void GoTo(Marker marker)
         {
             _sourceMarker = marker;
-        }
-
-        public string GetLine(Marker marker)
-        {
-            var sb = new StringBuilder();
-            Marker oldMarker = _sourceMarker;
-            marker.Pointer--;
-            GoTo(marker);
-
-            do
-            {
-                sb.Append(GetChar());
-            } while (_lastChar != '\n' && _lastChar != (char)0);
-
-            sb.Remove(sb.Length - 1, sb.Length);
-
-
-            GoTo(oldMarker);
-
-            return sb.ToString();
         }
 
         char GetChar()
@@ -66,11 +51,9 @@ namespace JackCompiler
             return _lastChar;
         }
 
-        public TokenType GetToken()
+        public Token GetToken()
         {
             var sb = new StringBuilder();
-
-            GetChar();
 
             while (_lastChar is ' ' or '\t' or '\r' or '\n')
             {
@@ -90,94 +73,113 @@ namespace JackCompiler
                 }
                 _lastToken += sb.ToString();
 
-                switch (_lastToken)
-                {
-                    case "class": return TokenType.Class;
-                    case "constructor": return TokenType.Constructor;
-                    case "function": return TokenType.Function;
-                    case "method": return TokenType.Method;
-                    case "field": return TokenType.Field;
-                    case "static": return TokenType.Static;
-                    case "var": return TokenType.Var;
-                    case "int": return TokenType.Int;
-                    case "char": return TokenType.Char;
-                    case "boolean": return TokenType.Boolean;
-                    case "void": return TokenType.Void;
-                    case "true": return TokenType.True;
-                    case "false": return TokenType.False;
-                    case "this": return TokenType.This;
-                    case "let": return TokenType.Let;
-                    case "do": return TokenType.Do;
-                    case "if": return TokenType.If;
-                    case "else": return TokenType.Else;
-                    case "while": return TokenType.While;
-                    case "return": return TokenType.Return;
-
-                    default: return TokenType.Identifier;
-                }
+                return GetKeywordOrIdentifier();
             }
 
             if (char.IsDigit(_lastChar))
             {
-                sb.Clear();
-                do
-                {
-                    sb.Append(_lastChar); 
-                } 
-                while (char.IsDigit(GetChar()));
-
-                var number = sb.ToString();
-
-                if (!int.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out int integer))
-                {
-                    throw new JackLexerException($"ERROR while parsing number on line {_tokenMarker.Line}, position {_tokenMarker.Column}");
-                }
-
-                _constant = new Constant(number);
-                return TokenType.IntegerConstant;
+                return GetIntegerConstant(sb);
             }
 
+            // Get symbol
             switch (_lastChar)
             {
-                case '{': return TokenType.LeftCurlyBracket;
-                case '}': return TokenType.RightCurlyBracket;
-                case '(': return TokenType.LeftParenthesis;
-                case ')': return TokenType.RightParenthesis;
-                case '[': return TokenType.LeftSquareBracket;
-                case ']': return TokenType.RightSquareBracket;
-                case '.': return TokenType.Period;
-                case ',': return TokenType.Comma;
-                case ';': return TokenType.SemiColon;
-                case '+': return TokenType.Plus;
-                case '-': return TokenType.Minus;
-                case '*': return TokenType.Multiply;
-                case '/': return TokenType.Divide;
-                case '&': return TokenType.And;
-                case '|': return TokenType.Or;
-                case '<': return TokenType.LesserThan;
-                case '>': return TokenType.GreaterThan;
-                case '=': return TokenType.Equal;
-                case '~': return TokenType.Not;
+                case '{': GetChar(); return new Token(null, TokenType.LeftCurlyBracket, _tokenMarker);
+                case '}': GetChar(); return new Token(null, TokenType.RightCurlyBracket, _tokenMarker);
+                case '(': GetChar(); return new Token(null, TokenType.LeftParenthesis, _tokenMarker);
+                case ')': GetChar(); return new Token(null, TokenType.RightParenthesis, _tokenMarker);
+                case '[': GetChar(); return new Token(null, TokenType.LeftSquareBracket, _tokenMarker);
+                case ']': GetChar(); return new Token(null, TokenType.RightSquareBracket, _tokenMarker);
+                case '.': GetChar(); return new Token(null, TokenType.Period, _tokenMarker);
+                case ',': GetChar(); return new Token(null, TokenType.Comma, _tokenMarker);
+                case ';': GetChar(); return new Token(null, TokenType.SemiColon, _tokenMarker);
+                case '+': GetChar(); return new Token(null, TokenType.Plus, _tokenMarker);
+                case '-': GetChar(); return new Token(null, TokenType.Minus, _tokenMarker);
+                case '*': GetChar(); return new Token(null, TokenType.Multiply, _tokenMarker);
+                case '/': GetChar(); return new Token(null, TokenType.Divide, _tokenMarker);
+                case '&': GetChar(); return new Token(null, TokenType.And, _tokenMarker);
+                case '|': GetChar(); return new Token(null, TokenType.Or, _tokenMarker);
+                case '<': GetChar(); return new Token(null, TokenType.LesserThan, _tokenMarker);
+                case '>': GetChar(); return new Token(null, TokenType.GreaterThan, _tokenMarker);
+                case '=': GetChar(); return new Token(null, TokenType.Equal, _tokenMarker);
+                case '~': GetChar(); return new Token(null, TokenType.Not, _tokenMarker);
             }
 
             if (_lastChar == '"')
             {
-                sb.Clear();
-                do
-                {
-                    sb.Append(GetChar());
-                } while (_lastChar != '"');
-
-                _constant = new Constant(sb.ToString());
-                return TokenType.StringConstant;
+                return GetStringConstant(sb);
             }
 
             if (_sourceMarker.Pointer >= _source.Length)
             {
-                return TokenType.EOF;
+                return new Token(null, TokenType.EOF, _tokenMarker);
             }
 
             throw new JackLexerException($"Token not recognized at line {_sourceMarker.Line}, position {_sourceMarker.Column}");
+        }
+
+        Token GetStringConstant(StringBuilder sb)
+        {
+            sb.Clear();
+
+            do
+            {
+                if (_lastChar != '"')
+                {
+                    sb.Append(_lastChar);
+                }
+
+                GetChar();
+            } while (_lastChar != '"');
+
+            GetChar();
+            return new Token(sb.ToString(), TokenType.StringConstant, _tokenMarker);
+        }
+
+        Token GetIntegerConstant(StringBuilder sb)
+        {
+            sb.Clear();
+            do
+            {
+                sb.Append(_lastChar);
+            } while (char.IsDigit(GetChar()));
+
+            var number = sb.ToString();
+
+            if (!int.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out int integer))
+            {
+                throw new JackLexerException($"ERROR while parsing number on line {_tokenMarker.Line}, position {_tokenMarker.Column}");
+            }
+
+            return new Token(integer.ToString(), TokenType.IntegerConstant, _tokenMarker);
+        }
+
+        Token GetKeywordOrIdentifier()
+        {
+            return _lastToken switch
+            {
+                "class" => new Token(null, TokenType.Class, _tokenMarker),
+                "constructor" => new Token(null, TokenType.Constructor, _tokenMarker),
+                "function" => new Token(null, TokenType.Function, _tokenMarker),
+                "method" => new Token(null, TokenType.Method, _tokenMarker),
+                "field" => new Token(null, TokenType.Field, _tokenMarker),
+                "static" => new Token(null, TokenType.Static, _tokenMarker),
+                "var" => new Token(null, TokenType.Var, _tokenMarker),
+                "int" => new Token(null, TokenType.Int, _tokenMarker),
+                "char" => new Token(null, TokenType.Char, _tokenMarker),
+                "boolean" => new Token(null, TokenType.Boolean, _tokenMarker),
+                "void" => new Token(null, TokenType.Void, _tokenMarker),
+                "true" => new Token(null, TokenType.True, _tokenMarker),
+                "false" => new Token(null, TokenType.False, _tokenMarker),
+                "this" => new Token(null, TokenType.This, _tokenMarker),
+                "let" => new Token(null, TokenType.Let, _tokenMarker),
+                "do" => new Token(null, TokenType.Do, _tokenMarker),
+                "if" => new Token(null, TokenType.If, _tokenMarker),
+                "else" => new Token(null, TokenType.Else, _tokenMarker),
+                "while" => new Token(null, TokenType.While, _tokenMarker),
+                "return" => new Token(null, TokenType.Return, _tokenMarker),
+                _ => new Token(_lastToken, TokenType.Identifier, _tokenMarker)
+            };
         }
     }
 }

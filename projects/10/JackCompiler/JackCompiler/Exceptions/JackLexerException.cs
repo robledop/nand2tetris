@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace JackCompiler
+namespace JackCompiler.Exceptions
 {
     public class JackLexerException : Exception
     {
@@ -9,11 +9,11 @@ namespace JackCompiler
         {
         }
 
-        public JackLexerException(string? message) : base(message)
+        public JackLexerException(string message) : base(message)
         {
         }
 
-        public JackLexerException(string? message, Exception? innerException) : base(message, innerException)
+        public JackLexerException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
