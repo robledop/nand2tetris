@@ -10,9 +10,9 @@ public class SyntaxAnalyzerTests
         string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\ArrayTest\", "Main.jack");
         var source = File.ReadAllText(path);
 
-        var analyzer = new SyntaxAnalyzer();
-        analyzer.GetTokens(source);
-        analyzer.AnalyzeClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        parser.ParseClass();
     }
 
     [Fact]
@@ -21,9 +21,9 @@ public class SyntaxAnalyzerTests
         string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Main.jack");
         var source = File.ReadAllText(path);
 
-        var analyzer = new SyntaxAnalyzer();
-        analyzer.GetTokens(source);
-        analyzer.AnalyzeClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        parser.ParseClass();
     }
 
     [Fact]
@@ -32,8 +32,8 @@ public class SyntaxAnalyzerTests
         string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\GameOfLife\", "Random.jack");
         var source = File.ReadAllText(path);
 
-        var analyzer = new SyntaxAnalyzer();
-        analyzer.GetTokens(source);
-        analyzer.AnalyzeClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        parser.ParseClass();
     }
 }

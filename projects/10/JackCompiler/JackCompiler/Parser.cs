@@ -5,7 +5,7 @@ using JackCompiler.Exceptions;
 
 namespace JackCompiler
 {
-    public class SyntaxAnalyzer
+    public class Parser
     {
         XmlNode _classNode;
         public List<Token> Tokens { get; set; } = new();
@@ -27,7 +27,7 @@ namespace JackCompiler
             }
         }
 
-        public void AnalyzeClass()
+        public void ParseClass()
         {
             CurrentToken = Tokens[Position];
             if (CurrentToken.Type == TokenType.Class)
@@ -35,9 +35,7 @@ namespace JackCompiler
                 _classNode = CreateNode("class");
                 XmlDocument.AppendChild(_classNode);
 
-                var keywordNode = CreateNode("keyword");
-                keywordNode.InnerText = "class";
-                _classNode.AppendChild(keywordNode);
+                ParseKeyword(_classNode, "class");
 
                 NextToken();
 
@@ -54,45 +52,16 @@ namespace JackCompiler
 
                 NextToken();
 
-
-                ParseLeftCurlyBracket();
+                ParseSymbol(_classNode, "{");
 
                 NextToken();
 
                 while (CurrentToken.Type is not (TokenType.RightCurlyBracket or TokenType.EOF))
                 {
-                    AnalyzeClassMembers();
+                    ParseClassMembers();
                 }
 
-                ParseRightCurlyBracket();
-
-                void ParseLeftCurlyBracket()
-                {
-                    if (CurrentToken.Type == TokenType.LeftCurlyBracket)
-                    {
-                        var symbolNode = CreateNode("symbol");
-                        symbolNode.InnerText = "{";
-                        _classNode.AppendChild(symbolNode);
-                    }
-                    else
-                    {
-                        throw new JackLexerException($"Expected left curly bracket at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                    }
-                }
-
-                void ParseRightCurlyBracket()
-                {
-                    if (CurrentToken.Type == TokenType.RightCurlyBracket)
-                    {
-                        var symbolNode = CreateNode("symbol");
-                        symbolNode.InnerText = "}";
-                        _classNode.AppendChild(symbolNode);
-                    }
-                    else
-                    {
-                        throw new JackLexerException($"Expected right curly bracket at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                    }
-                }
+                ParseSymbol(_classNode, "}");
             }
             else
             {
@@ -100,14 +69,14 @@ namespace JackCompiler
             }
         }
 
-        void AnalyzeClassMembers()
+        void ParseClassMembers()
         {
             switch (CurrentToken.Type)
             {
                 case TokenType.Field or TokenType.Static:
                     do
                     {
-                        AnalyzeClassVariableDeclarations();
+                        ParseClassVariableDeclarations();
                         NextToken();
                     } while (CurrentToken.Type != TokenType.Function &&
                              CurrentToken.Type != TokenType.Constructor &&
@@ -118,7 +87,7 @@ namespace JackCompiler
                 case TokenType.Function or TokenType.Method or TokenType.Constructor:
                     do
                     {
-                        AnalyzeSubroutine();
+                        ParseSubroutine();
                         NextToken();
                     } while (CurrentToken.Type != TokenType.RightCurlyBracket && CurrentToken.Type != TokenType.EOF);
                     break;
@@ -127,18 +96,18 @@ namespace JackCompiler
             }
         }
 
-        void AnalyzeSubroutine()
+        void ParseSubroutine()
         {
             var subRoutineNode = CreateNode("subroutineDec");
             _classNode.AppendChild(subRoutineNode);
 
-            ParseSubroutineType();
+            ParseSubroutineType(subRoutineNode);
             NextToken();
-            ParseReturnType();
+            ParseReturnType(subRoutineNode);
             NextToken();
             ParseSubroutineName();
             NextToken();
-            ParseLeftParenthesis();
+            ParseSymbol(subRoutineNode, "(");
             NextToken();
             if (CurrentToken.Type != TokenType.RightParenthesis)
             {
@@ -146,13 +115,13 @@ namespace JackCompiler
             }
             else
             {
-                ParseRightParenthesis();
+                ParseSymbol(subRoutineNode, ")");
             }
 
             do
             {
                 NextToken();
-                ParseLeftCurlyBracket();
+                ParseSymbol(subRoutineNode, "{");
                 NextToken();
                 var subroutineBodyNode = CreateNode("subroutineBody");
                 _classNode.AppendChild(subRoutineNode);
@@ -161,84 +130,12 @@ namespace JackCompiler
                 subRoutineNode.AppendChild(subroutineBodyNode);
 
                 NextToken();
-                ParseRightCurlyBracket();
+                ParseSymbol(subRoutineNode, "}");
                 NextToken();
             } while (CurrentToken.Type != TokenType.Function &&
                      CurrentToken.Type != TokenType.Constructor &&
                      CurrentToken.Type != TokenType.Method &&
                      CurrentToken.Type != TokenType.EOF);
-
-
-            void ParseSubroutineBody(XmlNode parentNode)
-            {
-                var varDecNode = CreateNode("varDec");
-                parentNode.AppendChild(varDecNode);
-                while (CurrentToken.Type == TokenType.Var)
-                {
-                    ParseKeyword(parentNode: varDecNode, "var");
-
-                    NextToken();
-                    ParseType(varDecNode);
-                    NextToken();
-                    do
-                    {
-                        if (CurrentToken.Type == TokenType.Comma)
-                        {
-                            ParseSymbol(parentNode: varDecNode, ",");
-                            NextToken();
-                        }
-
-                        ParseIdentifier(varDecNode);
-                        NextToken();
-                    } while (CurrentToken.Type == TokenType.Comma);
-
-                    ParseSemicolon(varDecNode);
-                    NextToken();
-                }
-
-                var statementsNode = CreateNode("statements");
-                parentNode.AppendChild(statementsNode);
-
-                while (CurrentToken.Type is TokenType.Let or
-                       TokenType.Do or
-                       TokenType.If or
-                       TokenType.Else or
-                       TokenType.While or
-                       TokenType.Return)
-                {
-                    ParseStatements(parentNode: statementsNode);
-                    NextToken();
-
-                }
-            }
-
-            void ParseLeftCurlyBracket()
-            {
-                if (CurrentToken.Type == TokenType.LeftCurlyBracket)
-                {
-                    var symbolNode = CreateNode("symbol");
-                    symbolNode.InnerText = "{";
-                    subRoutineNode.AppendChild(symbolNode);
-                }
-                else
-                {
-                    throw new JackLexerException($"Expected left curly bracket at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
-            }
-
-            void ParseRightCurlyBracket()
-            {
-                if (CurrentToken.Type == TokenType.RightCurlyBracket)
-                {
-                    var symbolNode = CreateNode("symbol");
-                    symbolNode.InnerText = "}";
-                    subRoutineNode.AppendChild(symbolNode);
-                }
-                else
-                {
-                    throw new JackLexerException($"Expected right curly bracket at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
-            }
 
             void ParseParameterList()
             {
@@ -258,56 +155,7 @@ namespace JackCompiler
                     NextToken();
                 } while (CurrentToken.Type == TokenType.Comma);
 
-                ParseRightParenthesis();
-            }
-
-            void ParseType(XmlNode parentNode)
-            {
-                switch (CurrentToken.Type)
-                {
-                    case TokenType.Int:
-                        ParseKeyword(parentNode, "int");
-                        break;
-
-                    case TokenType.Boolean:
-                        ParseKeyword(parentNode, "boolean");
-                        break;
-
-                    case TokenType.Char:
-                        ParseKeyword(parentNode, "char");
-                        break;
-
-                    case TokenType.Identifier:
-                        ParseIdentifier(parentNode);
-                        break;
-
-                    default:
-                        throw new JackAnalyzerException($"Type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
-            }
-
-            void ParseLeftParenthesis()
-            {
-                if (CurrentToken.Type == TokenType.LeftParenthesis)
-                {
-                    ParseSymbol(subRoutineNode, "(");
-                }
-                else
-                {
-                    throw new JackAnalyzerException($"Left parenthesis expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
-            }
-
-            void ParseRightParenthesis()
-            {
-                if (CurrentToken.Type == TokenType.RightParenthesis)
-                {
-                    ParseSymbol(subRoutineNode, ")");
-                }
-                else
-                {
-                    throw new JackAnalyzerException($"Right parenthesis expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
+                ParseSymbol(subRoutineNode, ")");
             }
 
             void ParseSubroutineName()
@@ -321,55 +169,55 @@ namespace JackCompiler
                     throw new JackAnalyzerException($"Subroutine identifier expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
                 }
             }
+        }
 
-            void ParseReturnType()
+        void ParseSubroutineType(XmlNode parentNode)
+        {
+            switch (CurrentToken.Type)
             {
-                switch (CurrentToken.Type)
-                {
-                    case TokenType.Void:
-                        ParseKeyword(subRoutineNode, "void");
-                        break;
+                case TokenType.Function:
+                    ParseKeyword(parentNode, "function");
+                    break;
 
-                    case TokenType.Identifier:
-                        ParseIdentifier(subRoutineNode);
-                        break;
+                case TokenType.Method:
+                    ParseKeyword(parentNode, "method");
+                    break;
 
-                    case TokenType.Int:
-                        ParseKeyword(subRoutineNode, "int");
-                        break;
+                case TokenType.Constructor:
+                    ParseKeyword(parentNode, "constructor");
+                    break;
 
-                    case TokenType.Boolean:
-                        ParseKeyword(subRoutineNode, "boolean");
-                        break;
-
-                    case TokenType.Char:
-                        ParseKeyword(subRoutineNode, "char");
-                        break;
-
-                    default:
-                        throw new JackAnalyzerException($"Return type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
+                default:
+                    throw new JackAnalyzerException($"Subroutine type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
             }
+        }
 
-            void ParseSubroutineType()
+        void ParseReturnType(XmlNode parentNode)
+        {
+            switch (CurrentToken.Type)
             {
-                switch (CurrentToken.Type)
-                {
-                    case TokenType.Function:
-                        ParseKeyword(subRoutineNode, "function");
-                        break;
+                case TokenType.Void:
+                    ParseKeyword(parentNode, "void");
+                    break;
 
-                    case TokenType.Method:
-                        ParseKeyword(subRoutineNode, "method");
-                        break;
+                case TokenType.Identifier:
+                    ParseIdentifier(parentNode);
+                    break;
 
-                    case TokenType.Constructor:
-                        ParseKeyword(subRoutineNode, "constructor");
-                        break;
+                case TokenType.Int:
+                    ParseKeyword(parentNode, "int");
+                    break;
 
-                    default:
-                        throw new JackAnalyzerException($"Subroutine type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
+                case TokenType.Boolean:
+                    ParseKeyword(parentNode, "boolean");
+                    break;
+
+                case TokenType.Char:
+                    ParseKeyword(parentNode, "char");
+                    break;
+
+                default:
+                    throw new JackAnalyzerException($"Return type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
             }
         }
 
@@ -483,90 +331,43 @@ namespace JackCompiler
             ParseSemicolon(letStatementNode);
         }
 
-
         void ParseExpression(XmlNode parentNode)
         {
             var expressionNode = CreateNode("expression");
             parentNode.AppendChild(expressionNode);
-            ParseTerm();
+            ParseExpressionTerm(expressionNode);
 
-            var isComparisonExpression = CheckForOperator();
-            while (isComparisonExpression)
+            var isOp = CheckForOperator(expressionNode);
+            while (isOp)
             {
                 NextToken();
-                ParseTerm();
-                isComparisonExpression = CheckForOperator();
-            }
-
-            bool CheckForOperator()
-            {
-                NextToken();
-                if (CurrentToken.Type is TokenType.Equal or TokenType.LesserThan or TokenType.GreaterThan or TokenType.And or TokenType.Or or TokenType.Plus or TokenType.Minus)
-                {
-                    ParseSymbol(expressionNode, CurrentToken.Value);
-                    return true;
-                }
-                else
-                {
-                    PreviousToken();
-                    return false;
-                }
-            }
-
-            void ParseTerm()
-            {
-                var termNode = CreateNode("term");
-                expressionNode.AppendChild(termNode);
-
-                switch (CurrentToken.Type)
-                {
-                    case TokenType.Identifier:
-                        ParseVariableName(termNode);
-                        break;
-
-                    case TokenType.IntegerConstant:
-                        ParseIntegerConstant(parentNode: termNode);
-                        break;
-
-                    case TokenType.StringConstant:
-                        ParseStringConstant(parentNode: termNode);
-
-                        break;
-
-                    case TokenType.True:
-                        ParseKeyword(parentNode: termNode, "true");
-                        break;
-
-                    case TokenType.False:
-                        ParseKeyword(parentNode: termNode, "false");
-                        break;
-
-                    case TokenType.Null:
-                        ParseKeyword(parentNode: termNode, "null");
-                        break;
-
-                    case TokenType.This:
-                        ParseKeyword(parentNode: termNode, "this");
-                        break;
-
-                    case TokenType.Minus:
-                        ParseSymbol(parentNode: termNode, "-");
-                        break;
-
-                    case TokenType.Not:
-                        ParseSymbol(parentNode: termNode, "~");
-                        break;
-                }
+                ParseExpressionTerm(expressionNode);
+                isOp = CheckForOperator(expressionNode);
             }
         }
 
-        void AnalyzeClassVariableDeclarations()
+        bool CheckForOperator(XmlNode parentNode)
+        {
+            NextToken();
+            if (CurrentToken.Type is TokenType.Equal or TokenType.LesserThan or TokenType.GreaterThan or TokenType.And or TokenType.Or or TokenType.Plus or TokenType.Minus)
+            {
+                ParseSymbol(parentNode, CurrentToken.Value);
+                return true;
+            }
+            else
+            {
+                PreviousToken();
+                return false;
+            }
+        }
+
+        void ParseClassVariableDeclarations()
         {
             var classVarDecNode = CreateNode("classVarDec");
             _classNode.AppendChild(classVarDecNode);
             ParseStaticOrField();
             NextToken();
-            ParseType();
+            ParseType(classVarDecNode);
             NextToken();
             do
             {
@@ -596,30 +397,51 @@ namespace JackCompiler
                         break;
                 }
             }
+        }
 
-            void ParseType()
+        void ParseExpressionTerm(XmlNode parentNode)
+        {
+            var termNode = CreateNode("term");
+            parentNode.AppendChild(termNode);
+
+            switch (CurrentToken.Type)
             {
-                switch (CurrentToken.Type)
-                {
-                    case TokenType.Int:
-                        ParseKeyword(classVarDecNode, "int");
-                        break;
+                case TokenType.Identifier:
+                    ParseVariableName(termNode);
+                    break;
 
-                    case TokenType.Boolean:
-                        ParseKeyword(classVarDecNode, "boolean");
-                        break;
+                case TokenType.IntegerConstant:
+                    ParseIntegerConstant(parentNode: termNode);
+                    break;
 
-                    case TokenType.Char:
-                        ParseKeyword(classVarDecNode, "char");
-                        break;
+                case TokenType.StringConstant:
+                    ParseStringConstant(parentNode: termNode);
 
-                    case TokenType.Identifier:
-                        ParseIdentifier(classVarDecNode);
-                        break;
+                    break;
 
-                    default:
-                        throw new JackAnalyzerException($"Type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
-                }
+                case TokenType.True:
+                    ParseKeyword(parentNode: termNode, "true");
+                    break;
+
+                case TokenType.False:
+                    ParseKeyword(parentNode: termNode, "false");
+                    break;
+
+                case TokenType.Null:
+                    ParseKeyword(parentNode: termNode, "null");
+                    break;
+
+                case TokenType.This:
+                    ParseKeyword(parentNode: termNode, "this");
+                    break;
+
+                case TokenType.Minus:
+                    ParseSymbol(parentNode: termNode, "-");
+                    break;
+
+                case TokenType.Not:
+                    ParseSymbol(parentNode: termNode, "~");
+                    break;
             }
         }
 
@@ -633,7 +455,7 @@ namespace JackCompiler
                     break;
 
                 case TokenType.Period:
-                    ParseSubroutineCallOnAnObject();
+                    ParseSubroutineCallOnAnObject(parentNode);
                     break;
 
                 case TokenType.LeftParenthesis:
@@ -641,50 +463,47 @@ namespace JackCompiler
                     break;
 
                 default:
-                    ParseVariable();
+                    ParseVariable(parentNode);
                     break;
-            }
-
-
-            void ParseSubroutineCall()
-            {
-                Debugger.Break();
-            }
-
-            void ParseSubroutineCallOnAnObject()
-            {
-                PreviousToken();
-                ParseIdentifier(parentNode: parentNode);
-                NextToken();
-                ParseSymbol(parentNode, ".");
-                NextToken();
-                ParseIdentifier(parentNode);
-                NextToken();
-                ParseSymbol(parentNode, "(");
-                NextToken();
-                var expressionListNode = CreateNode("expressionList");
-                parentNode.AppendChild(expressionListNode);
-
-                if (CurrentToken.Type != TokenType.RightParenthesis)
-                {
-                    do
-                    {
-                        ParseExpression(expressionListNode);
-                        NextToken();
-                    } while (CurrentToken.Type == TokenType.Comma);
-                }
-
-                ParseSymbol(parentNode, ")");
-            }
-
-            void ParseVariable()
-            {
-                PreviousToken();
-                ParseIdentifier(parentNode: parentNode);
             }
         }
 
+        void ParseVariable(XmlNode parentNode)
+        {
+            PreviousToken();
+            ParseIdentifier(parentNode: parentNode);
+        }
 
+        void ParseSubroutineCallOnAnObject(XmlNode parentNode)
+        {
+            PreviousToken();
+            ParseIdentifier(parentNode: parentNode);
+            NextToken();
+            ParseSymbol(parentNode, ".");
+            NextToken();
+            ParseIdentifier(parentNode);
+            NextToken();
+            ParseSymbol(parentNode, "(");
+            NextToken();
+            var expressionListNode = CreateNode("expressionList");
+            parentNode.AppendChild(expressionListNode);
+
+            if (CurrentToken.Type != TokenType.RightParenthesis)
+            {
+                do
+                {
+                    ParseExpression(expressionListNode);
+                    NextToken();
+                } while (CurrentToken.Type == TokenType.Comma);
+            }
+
+            ParseSymbol(parentNode, ")");
+        }
+
+        void ParseSubroutineCall()
+        {
+            Debugger.Break();
+        }
 
         void ParseSymbol(XmlNode parentNode, string symbol)
         {
@@ -728,8 +547,6 @@ namespace JackCompiler
             parentNode.AppendChild(integerConstantNode);
         }
 
-
-
         void ParseIdentifier(XmlNode parentNode)
         {
             if (CurrentToken.Type == TokenType.Identifier)
@@ -755,6 +572,73 @@ namespace JackCompiler
             else
             {
                 throw new JackAnalyzerException($"Semicolon expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
+            }
+        }
+
+        void ParseSubroutineBody(XmlNode parentNode)
+        {
+            var varDecNode = CreateNode("varDec");
+            parentNode.AppendChild(varDecNode);
+            while (CurrentToken.Type == TokenType.Var)
+            {
+                ParseKeyword(parentNode: varDecNode, "var");
+
+                NextToken();
+                ParseType(varDecNode);
+                NextToken();
+                do
+                {
+                    if (CurrentToken.Type == TokenType.Comma)
+                    {
+                        ParseSymbol(parentNode: varDecNode, ",");
+                        NextToken();
+                    }
+
+                    ParseIdentifier(varDecNode);
+                    NextToken();
+                } while (CurrentToken.Type == TokenType.Comma);
+
+                ParseSemicolon(varDecNode);
+                NextToken();
+            }
+
+            var statementsNode = CreateNode("statements");
+            parentNode.AppendChild(statementsNode);
+
+            while (CurrentToken.Type is TokenType.Let or
+                   TokenType.Do or
+                   TokenType.If or
+                   TokenType.Else or
+                   TokenType.While or
+                   TokenType.Return)
+            {
+                ParseStatements(parentNode: statementsNode);
+                NextToken();
+            }
+        }
+
+        void ParseType(XmlNode parentNode)
+        {
+            switch (CurrentToken.Type)
+            {
+                case TokenType.Int:
+                    ParseKeyword(parentNode, "int");
+                    break;
+
+                case TokenType.Boolean:
+                    ParseKeyword(parentNode, "boolean");
+                    break;
+
+                case TokenType.Char:
+                    ParseKeyword(parentNode, "char");
+                    break;
+
+                case TokenType.Identifier:
+                    ParseIdentifier(parentNode);
+                    break;
+
+                default:
+                    throw new JackAnalyzerException($"Type expected at line {CurrentToken.Marker.Line}, position {CurrentToken.Marker.Column}");
             }
         }
 
