@@ -1,4 +1,5 @@
 using FluentAssertions;
+using JackCompiler.JackAnalyzer;
 
 namespace JackCompiler.Tests;
 
@@ -21,7 +22,6 @@ public class LexerTests
         }
 
         tokens.Count.Should().Be(141);
-        
     }
 
     [Fact]

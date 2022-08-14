@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Aug 13 19:28:10 2022
+# Make data base, printed on Sun Aug 14 10:54:01 2022
 
 # Variables
 
@@ -21,7 +21,7 @@ USERPROFILE = C:\Users\Robledo
 # environment
 LOCALAPPDATA = C:\Users\Robledo\AppData\Local
 # environment
-VSCODE_CWD = C:\nand2tetris\projects
+VSCODE_CWD = C:\Users\Robledo\AppData\Local\Programs\Microsoft VS Code
 # environment
 CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
 # environment
@@ -29,13 +29,13 @@ SYSTEMROOT = C:\Windows
 # environment
 PROCESSOR_LEVEL = 6
 # environment
-PSMODULEPATH = %ProgramFiles%\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules;C:\Program Files\Intel\Wired Networking\
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules;C:\Program Files\Intel\Wired Networking\
 # default
 MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_22496_MDPHHPAWZMFLMGNI
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_60516_FCBSWWYKLBRMWRQU
 # environment
 ONEDRIVECOMMERCIAL = C:\Users\Robledo\OneDrive - Forum Info-Tech, Inc
 # environment
@@ -89,7 +89,7 @@ MAKEFILE_LIST :=
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 22496
+VSCODE_PID = 60516
 # automatic
 ?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
 # automatic
@@ -121,7 +121,7 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Python310\Scripts\;C:\Program Files\Python310\;C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Microsoft\jdk-11.0.12.7-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft\Azure Functions Core Tools\;C:\ProgramData\chocolatey\bin;C:\Program Files\nodejs\;C:\Program Files\LINQPad7;C:\Program Files\Inkscape\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files\Amazon\AWSSAMCLI\bin\;C:\Program Files\OpenSSL-Win64\bin;C:\Program Files\PowerShell\7\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Git\cmd;C:\Users\Robledo\AppData\Local\Microsoft\WindowsApps;C:\Users\Robledo\.dotnet\tools;C:\Users\Robledo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Robledo\AppData\Local\GitHubDesktop\bin;C:\Users\Robledo\AppData\Roaming\npm;C:\Users\Robledo\AppData\Local\Programs\oh-my-posh\bin;C:\Users\Robledo\AppData\Local\Programs\oh-my-posh\themes;C:\Program Files (x86)\GitHub CLI\;C:\tools\neovim\Neovim\bin;c:\Python310;c:\python310\scripts;C:\Program Files\JetBrains\JetBrains Rider 2022.1.2\bin
+PATH = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Python310\Scripts\;C:\Program Files\Python310\;C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Microsoft\jdk-11.0.12.7-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft\Azure Functions Core Tools\;C:\ProgramData\chocolatey\bin;C:\Program Files\nodejs\;C:\Program Files\LINQPad7;C:\Program Files\Inkscape\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files\Amazon\AWSSAMCLI\bin\;C:\Program Files\OpenSSL-Win64\bin;C:\Program Files\PowerShell\7\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\Git\cmd;C:\Users\Robledo\AppData\Local\Microsoft\WindowsApps;C:\Users\Robledo\.dotnet\tools;C:\Users\Robledo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Robledo\AppData\Local\GitHubDesktop\bin;C:\Users\Robledo\AppData\Roaming\npm;C:\Users\Robledo\AppData\Local\Programs\oh-my-posh\bin;C:\Users\Robledo\AppData\Local\Programs\oh-my-posh\themes;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Program Files (x86)\GitHub CLI\;C:\tools\neovim\Neovim\bin;c:\Python310;c:\python310\scripts;;C:\Program Files\JetBrains\JetBrains Rider 2022.1.2\bin;
 # environment
 ZES_ENABLE_SYSMAN = 1
 # environment
@@ -194,6 +194,8 @@ CERT_THUMBPRINT = 5017ee6d32616baa91031e696a39ce73ae49ee41
 SUFFIXES := 
 # environment
 ALLUSERSPROFILE = C:\ProgramData
+# environment
+SESSIONNAME = Console
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync load
 # environment
@@ -207,7 +209,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 151 Stepping 2, GenuineIntel
 # environment
 DOTNET_WATCH_RESTART_ON_RUDE_EDIT = true
 # variable set hash-table stats:
-# Load=97/1024=9%, Rehash=0, Collisions=8/121=7%
+# Load=98/1024=10%, Rehash=0, Collisions=8/122=7%
 
 # Pattern-specific Variable Values
 
@@ -280,6 +282,6 @@ GNUmakefile:
 # strcache performance: lookups = 29 / hit rate = 10%
 # hash-table stats:
 # Load=26/8192=0%, Rehash=0, Collisions=0/29=0%
-# Finished Make data base on Sat Aug 13 19:28:10 2022
+# Finished Make data base on Sun Aug 14 10:54:01 2022
 
  

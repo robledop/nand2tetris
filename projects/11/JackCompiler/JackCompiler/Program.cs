@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Xml;
+using JackCompiler.JackAnalyzer;
 
 if (args.Length == 0)
 {

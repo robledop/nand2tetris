@@ -1,4 +1,5 @@
-﻿using JackCompiler.Tests.Helpers;
+﻿using JackCompiler.JackAnalyzer;
+using JackCompiler.Tests.Helpers;
 
 namespace JackCompiler.Tests;
 

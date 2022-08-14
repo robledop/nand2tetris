@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Xml;
 using JackCompiler.Exceptions;
 
-namespace JackCompiler
+namespace JackCompiler.JackAnalyzer
 {
     public class Parser
     {
         XmlNode _classNode;
-        public List<Token> Tokens { get; set; } = new();
-        public XmlDocument XmlDocument { get; set; } = new();
-        public int Position { get; set; }
-        public Token CurrentToken { get; set; }
+        List<Token> Tokens { get; set; } = new();
+        XmlDocument XmlDocument { get; set; } = new();
+        int Position { get; set; }
+        Token CurrentToken { get; set; }
 
         public void GetTokens(string source)
         {
