@@ -21,6 +21,7 @@ public class LexerTests
         }
 
         tokens.Count.Should().Be(141);
+        
     }
 
     [Fact]

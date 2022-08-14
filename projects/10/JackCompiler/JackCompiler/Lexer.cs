@@ -173,6 +173,7 @@ namespace JackCompiler
                 "else" => new Token("else", TokenType.Else, _tokenMarker),
                 "while" => new Token("while", TokenType.While, _tokenMarker),
                 "return" => new Token("return", TokenType.Return, _tokenMarker),
+                "null" => new Token("null", TokenType.Null, _tokenMarker),
                 _ => new Token(_lastToken, TokenType.Identifier, _tokenMarker)
             };
         }

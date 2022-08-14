@@ -46,6 +46,5 @@
         StringConstant,
         Identifier,
         EOF
-
     }
 }

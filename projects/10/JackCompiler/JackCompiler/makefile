@@ -1,4 +1,4 @@
-EXEC=JackCompiler
+EXEC=JackAnalyzer
 
 all:
 	dotnet build --output build
