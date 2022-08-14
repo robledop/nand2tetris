@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Aug 13 19:19:11 2022
+# Make data base, printed on Sat Aug 13 19:28:10 2022
 
 # Variables
 
@@ -35,7 +35,7 @@ MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_39484_KKUCTZLSHNVQSRPF
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_22496_MDPHHPAWZMFLMGNI
 # environment
 ONEDRIVECOMMERCIAL = C:\Users\Robledo\OneDrive - Forum Info-Tech, Inc
 # environment
@@ -89,7 +89,7 @@ MAKEFILE_LIST :=
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 39484
+VSCODE_PID = 22496
 # automatic
 ?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
 # automatic
@@ -280,6 +280,6 @@ GNUmakefile:
 # strcache performance: lookups = 29 / hit rate = 10%
 # hash-table stats:
 # Load=26/8192=0%, Rehash=0, Collisions=0/29=0%
-# Finished Make data base on Sat Aug 13 19:19:11 2022
+# Finished Make data base on Sat Aug 13 19:28:10 2022
 
  
