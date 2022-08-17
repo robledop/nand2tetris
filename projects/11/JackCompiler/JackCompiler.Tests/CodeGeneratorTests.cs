@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Xml;
+using FluentAssertions;
 using JackCompiler.JackAnalyzer;
 using JackCompiler.JackCodeGenerator;
 
@@ -18,7 +19,7 @@ public class CodeGeneratorTests
         parser.GetTokens(source);
         var parseTree = parser.ParseClass();
         var codeGenerator = new CodeGenerator(parseTree);
-        
+
         codeGenerator.GenerateClassSymbolTable();
 
         codeGenerator.ClassSymbolTable.Count.Should().Be(3);
@@ -184,5 +185,173 @@ public class CodeGeneratorTests
         };
 
         codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
+
+    [Fact]
+    public void CompileExpression_IntegerConstant()
+    {
+        var expressionNodeXml = @"
+            <expression>
+                <term>
+                    <integerConstant> 10 </integerConstant>
+                </term>
+            </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml);
+
+        var codeGenerator = new CodeGenerator(xmlDocument);
+
+        var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode.Should().Be("push constant 10");
+    }
+
+    [Fact]
+    public void CompileExpression_Argument()
+    {
+        var source = @"
+            class Square {
+               constructor Square new(int Ax, int Ay, int Asize) {
+                  let x = Ax;
+                  let y = Ay;
+                  let size = Asize;
+                  return this;
+               }
+            }
+            ";
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var expressionNodeXml1 = @"
+           <expression>
+            <term>
+              <identifier> Ax </identifier>
+            </term>
+          </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be("push argument 1");
+
+        var expressionNodeXml2 = @"
+            <expression>
+                <term>
+                    <identifier> Ay </identifier>
+                </term>
+            </expression>";
+        xmlDocument.LoadXml(expressionNodeXml2);
+
+        var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode2.Should().Be("push argument 2");
+    }
+
+    [Fact]
+    public void CompileExpression_UnaryOp()
+    {
+        var source = @"
+            class Main {
+                function void more() { 
+                    var int i, j;      
+                    let i = i * (-j);
+                    return;
+                }
+            }
+            ";
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var expressionNodeXml1 = @"
+           <expression>
+                <term>
+                    <symbol> - </symbol>
+                    <term>
+                        <identifier> j </identifier>
+                    </term>
+                </term>
+           </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode.Should().Be(
+@"push local 1
+neg");
+    }
+
+    [Fact]
+    public void CompileExpression_Op()
+    {
+        var source = @"
+            class Main {
+                function void more() { 
+                    var int i, j;      
+                    let i = i | j;
+                    let i = i * j;
+                    return;
+                }
+            }";
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var expressionNodeXml1 = @"
+            <expression>
+                <term>
+                    <identifier> i </identifier>
+                </term>
+                <symbol> | </symbol>
+                <term>
+                    <identifier> j </identifier>
+                </term>
+            </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+@"push local 0
+push local 1
+or");
+
+        var expressionNodeXml2 = @"
+            <expression>
+                <term>
+                    <identifier> i </identifier>
+                </term>
+                <symbol> * </symbol>
+                <term>
+                    <identifier> j </identifier>
+                </term>
+            </expression>";
+
+        xmlDocument.LoadXml(expressionNodeXml2);
+        var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        vmCode2.Should().Be(
+@"push local 0
+push local 1
+call Math.multiply()");
     }
 }

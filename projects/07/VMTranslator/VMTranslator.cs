@@ -7,7 +7,7 @@ using System.Reflection.Metadata;
 
 namespace VMTranslator
 {
-    public class VMTranslator
+    public static class VMTranslator
     {
         public static void Main(string[] args)
         {

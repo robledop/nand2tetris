@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using JackCompiler.Exceptions;
 
@@ -80,6 +82,112 @@ namespace JackCompiler.JackCodeGenerator
                     ClassSymbolTable.Add(symbol);
                 }
             }
+        }
+
+        internal string CompileExpression(XmlNode expressionNode)
+        {
+            var sb = new StringBuilder();
+            var terms = expressionNode.SelectNodes("//term");
+
+            if (terms!.Count == 1)
+            {
+                var term = terms[0];
+                switch (term!.FirstChild!.Name)
+                {
+                    // if exp is number n:
+                    //      output "push n"
+                    case "integerConstant":
+                        sb.AppendLine($"push constant {term.FirstChild.InnerText.Trim()}");
+                        break;
+
+                    // if exp is a variable var:
+                    //      output "push var"
+                    case "identifier":
+                        var identifier = term.FirstChild.InnerText.Trim();
+                        var symbol = SubroutineSymbolTable.FirstOrDefault(s => s.Name == identifier) ??
+                                     ClassSymbolTable.FirstOrDefault(s => s.Name == identifier);
+                        sb.AppendLine($"push {GetSegmentName(symbol!.Kind)} {symbol.Position}");
+                        break;
+                }
+            }
+
+            // if exp is "op exp"
+            //      codeWrite(exp),
+            //      output "op"
+            if (terms.Count == 2 && terms[0]?.FirstChild?.Name == "symbol")
+            {
+                var firstTerm = terms[0];
+                var secondTerm = terms[1];
+                var expNode = CreateNode(secondTerm?.OwnerDocument, "expression");
+                expNode.AppendChild(secondTerm.CloneNode(true));
+                sb.Append(CompileExpression(expNode));
+                sb.AppendLine(GetUnaryOp(firstTerm.FirstChild?.InnerText.Trim()));
+            }
+
+            // if exp is "exp1 op exp2":
+            //      codeWrite(exp1),
+            //      codeWrite(exp2),
+            //      output "op"
+            else if (terms.Count == 2)
+            {
+                var opTerms = expressionNode.SelectNodes("term");
+                foreach (XmlNode opTerm in opTerms)
+                {
+                    var expNode1 = CreateNode(opTerm?.OwnerDocument, "expression");
+                    expNode1.AppendChild(opTerm.CloneNode(true));
+                    sb.Append(CompileExpression(expNode1));
+                }
+
+                var symbol = expressionNode.SelectNodes("symbol")?[0];
+                sb.AppendLine(GetOp(symbol.InnerText.Trim()));
+            }
+
+
+            // if exp is "f(exp1, exp2, ...)":
+            //      codeWrite(exp1),
+            //      codeWrite(exp2), ...,
+            //      output "call f"
+
+            return sb.ToString();
+        }
+
+        string GetSegmentName(SymbolKind kind)
+        {
+            return kind switch
+            {
+                SymbolKind.Argument => "argument",
+                SymbolKind.Local => "local",
+                SymbolKind.Field => "this",
+                SymbolKind.Static => "static",
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            };
+        }
+
+        string GetUnaryOp(string op)
+        {
+            return op switch
+            {
+                "-" => "neg",
+                "~" => "not",
+                _ => throw new NotSupportedException(op)
+            };
+        }
+
+        string GetOp(string op)
+        {
+            return op switch
+            {
+                "-" => "sub",
+                "+" => "add",
+                "&" => "and",
+                "|" => "or",
+                "=" => "eq",
+                "<" => "lt",
+                ">" => "gt",
+                "*" => "call Math.multiply()",
+                "/" => "call Math.divide()",
+                _ => throw new NotSupportedException(op)
+            };
         }
 
         internal void CompileSubroutines()
@@ -182,6 +290,13 @@ namespace JackCompiler.JackCodeGenerator
                     SubroutineSymbolTable.Add(symbol);
                 }
             }
+        }
+
+        XmlNode CreateNode(XmlDocument xmlDoc, string name)
+        {
+            var node = xmlDoc.CreateElement("", name, "");
+            node.IsEmpty = false;
+            return node;
         }
     }
 }
