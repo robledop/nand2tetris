@@ -354,4 +354,118 @@ or");
 push local 1
 call Math.multiply()");
     }
+
+    [Fact]
+    public void CompileExpression_ExpressionListEmpty()
+    {
+        var source = @"
+            class Cell 
+            {
+                field Array _neighbors;
+
+                method void determineNextLiveState()
+                {
+                    var Cell currentNeighbor;
+                    var int liveNeighbors, i;
+                    
+                    let liveNeighbors = 0;
+                    let i = 0;
+                    while(i < 8)
+                    {
+                        let currentNeighbor = _neighbors[i];
+                        if(currentNeighbor.getIsAlive())
+                        {
+                            let liveNeighbors = liveNeighbors + 1;
+                        }
+                        let i = i + 1;
+                    }
+                }
+            }";
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var expressionNodeXml1 = @"
+                <expression>
+                    <term>
+                      <identifier> currentNeighbor </identifier>
+                      <symbol> . </symbol>
+                      <identifier> getIsAlive </identifier>
+                      <symbol> ( </symbol>
+                      <expressionList>
+                      </expressionList>
+                      <symbol> ) </symbol>
+                    </term>
+                </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(@"call currentNeighbor.getIsAlive 0");
+    }
+
+    [Fact]
+    public void CompileExpression_ExpressionList()
+    {
+        var source = @"
+            class Cell 
+            {
+                method void determineNextLiveState()
+                {
+                    var Cell currentNeighbor;
+                    var int a;
+                    let a = 10;
+                    if(currentNeighbor.getIsAlive(1, a))
+                    {
+                    }
+                }
+            }";
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var expressionNodeXml1 = @"
+                <expression>
+                    <term>
+                      <identifier> currentNeighbor </identifier>
+                      <symbol> . </symbol>
+                      <identifier> getIsAlive </identifier>
+                      <symbol> ( </symbol>
+                      <expressionList>
+                          <expression>
+                            <term>
+                                <integerConstant> 1 </integerConstant>
+                            </term>
+                          </expression>
+                          <symbol> , </symbol>
+                          <expression>
+                            <term>
+                                <identifier> a </identifier>
+                            </term>
+                          </expression>
+                      </expressionList>
+                      <symbol> ) </symbol>
+                    </term>
+                </expression>";
+
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+@"push constant 1
+push local 1
+call currentNeighbor.getIsAlive 2");
+    }
 }

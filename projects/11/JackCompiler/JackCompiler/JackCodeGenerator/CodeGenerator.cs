@@ -89,32 +89,43 @@ namespace JackCompiler.JackCodeGenerator
             var sb = new StringBuilder();
             var terms = expressionNode.SelectNodes("//term");
 
-            if (terms!.Count == 1)
+            // if exp is "f(exp1, exp2, ...)":
+            //      codeWrite(exp1),
+            //      codeWrite(exp2), ...,
+            //      output "call f"
+            var expressionList = expressionNode.SelectNodes("//expressionList")?.Item(0);
+            if (expressionList is not null)
             {
-                var term = terms[0];
-                switch (term!.FirstChild!.Name)
+                var expressions = expressionList.SelectNodes("expression");
+                if (expressions is not null)
                 {
-                    // if exp is number n:
-                    //      output "push n"
-                    case "integerConstant":
-                        sb.AppendLine($"push constant {term.FirstChild.InnerText.Trim()}");
-                        break;
+                    foreach (XmlNode expression in expressions)
+                    {
+                        var expNode = CreateNode(expression?.OwnerDocument, "expression");
+                        expNode.AppendChild(expression.CloneNode(true));
+                        sb.Append(CompileExpression(expNode));
+                    }
+                }
 
-                    // if exp is a variable var:
-                    //      output "push var"
-                    case "identifier":
-                        var identifier = term.FirstChild.InnerText.Trim();
-                        var symbol = SubroutineSymbolTable.FirstOrDefault(s => s.Name == identifier) ??
-                                     ClassSymbolTable.FirstOrDefault(s => s.Name == identifier);
-                        sb.AppendLine($"push {GetSegmentName(symbol!.Kind)} {symbol.Position}");
-                        break;
+                var firstTerm = terms[0];
+                var identifiers = firstTerm.SelectNodes("identifier");
+                var firstIdentifier = identifiers[0];
+
+                if (firstIdentifier.NextSibling.InnerText.Trim() == ".")
+                {
+                    var secondIdentifier = identifiers[1];
+                    sb.AppendLine($"call {firstIdentifier.InnerText.Trim()}.{secondIdentifier.InnerText.Trim()} {expressions?.Count ?? 0}");
+                }
+                else if(firstIdentifier.NextSibling.InnerText.Trim() == "(")
+                {
+                    sb.AppendLine($"call {firstIdentifier.InnerText.Trim()} {expressions?.Count ?? 0}");
                 }
             }
 
             // if exp is "op exp"
             //      codeWrite(exp),
             //      output "op"
-            if (terms.Count == 2 && terms[0]?.FirstChild?.Name == "symbol")
+            else if (terms.Count == 2 && terms[0]?.FirstChild?.Name == "symbol")
             {
                 var firstTerm = terms[0];
                 var secondTerm = terms[1];
@@ -141,12 +152,31 @@ namespace JackCompiler.JackCodeGenerator
                 var symbol = expressionNode.SelectNodes("symbol")?[0];
                 sb.AppendLine(GetOp(symbol.InnerText.Trim()));
             }
+            else if (terms!.Count == 1)
+            {
+                var term = terms[0];
+                switch (term!.FirstChild!.Name)
+                {
+                    // if exp is number n:
+                    //      output "push n"
+                    case "integerConstant":
+                        sb.AppendLine($"push constant {term.FirstChild.InnerText.Trim()}");
+                        break;
 
-
-            // if exp is "f(exp1, exp2, ...)":
-            //      codeWrite(exp1),
-            //      codeWrite(exp2), ...,
-            //      output "call f"
+                    // if exp is a variable var:
+                    //      output "push var"
+                    case "identifier":
+                        var identifier = term.FirstChild.InnerText.Trim();
+                        var symbol = SubroutineSymbolTable.FirstOrDefault(s => s.Name == identifier) ??
+                                     ClassSymbolTable.FirstOrDefault(s => s.Name == identifier);
+                        sb.AppendLine($"push {GetSegmentName(symbol!.Kind)} {symbol.Position}");
+                        break;
+                }
+            }
+            else
+            {
+                throw new JackCompilerException("Expression not recognized");
+            }
 
             return sb.ToString();
         }
