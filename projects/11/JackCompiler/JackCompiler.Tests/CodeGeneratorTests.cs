@@ -352,7 +352,7 @@ or");
         vmCode2.Should().Be(
 @"push local 0
 push local 1
-call Math.multiply()");
+call Math.multiply() 2");
     }
 
     [Fact]
@@ -407,7 +407,10 @@ call Math.multiply()");
 
         var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-        vmCode1.Should().Be(@"call currentNeighbor.getIsAlive 0");
+        vmCode1.Should().Be(
+@"push local 0
+pop pointer 0
+call Cell.getIsAlive 0");
     }
 
     [Fact]
@@ -466,6 +469,331 @@ call Math.multiply()");
         vmCode1.Should().Be(
 @"push constant 1
 push local 1
-call currentNeighbor.getIsAlive 2");
+push local 0
+pop pointer 0
+call Cell.getIsAlive 2");
+    }
+
+    [Fact]
+    public void CompileLetStatements()
+    {
+        var source = @"
+            class Cell {
+              method void determineNextLiveState() {
+                var Cell currentNeighbor;
+                var int liveNeighbors, i;
+                let liveNeighbors = 0;
+                let i = 0;
+                return;
+              }
+            }
+";
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var statementNodeXml = @"
+        <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> liveNeighbors </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <integerConstant> 0 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> i </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <integerConstant> 0 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+        </statements>
+";
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+            @"push constant 0
+pop local 1
+push constant 0
+pop local 2");
+    }
+
+    [Fact]
+    public void CompileWhileStatements()
+    {
+        var source = @"
+            class Cell {
+               method void determineNextLiveState() {
+                var int liveNeighbors, i;
+                    
+                let i = 0;
+                while(i < 8)
+                {
+                  let i = i + 1;
+                }
+
+                return;
+              }
+            }
+";
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var statementNodeXml = @"
+        <statements>
+            <whileStatement>
+              <keyword> while </keyword>
+              <symbol> ( </symbol>
+              <expression>
+                <term>
+                  <identifier> i </identifier>
+                </term>
+                <symbol> &lt; </symbol>
+                <term>
+                  <integerConstant> 8 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ) </symbol>
+              <symbol> { </symbol>
+              <statements>
+                <letStatement>
+                  <keyword> let </keyword>
+                  <identifier> i </identifier>
+                  <symbol> = </symbol>
+                  <expression>
+                    <term>
+                      <identifier> i </identifier>
+                    </term>
+                    <symbol> + </symbol>
+                    <term>
+                      <integerConstant> 1 </integerConstant>
+                    </term>
+                  </expression>
+                  <symbol> ; </symbol>
+                </letStatement>
+              </statements>
+              <symbol> } </symbol>
+            </whileStatement>
+        </statements>
+";
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+            @"label WHILE_EXP0
+push local 1
+push constant 8
+lt
+not
+if-goto WHILE_END0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0");
+    }
+
+    [Fact]
+    public void CompileIfStatements()
+    {
+        var source = @"
+            class Cell {
+               method void determineNextLiveState() {
+                var int liveNeighbors, i;
+                    
+                let i = 0;
+                while(i < 8)
+                {
+                  if ( i < 4 ) {
+                    let i = i + 1;
+                  } else {
+                    let i = 1 + 1;
+                  }
+                  let i = i + 1;
+                }
+
+                return;
+              }
+            }
+";
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var statementNodeXml = @"
+        <statements>
+            <ifStatement>
+              <keyword> if </keyword>
+              <symbol> ( </symbol>
+              <expression>
+                <term>
+                  <identifier> i </identifier>
+                </term>
+                <symbol> &lt; </symbol>
+                <term>
+                  <integerConstant> 8 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ) </symbol>
+              <symbol> { </symbol>
+              <statements>
+                <letStatement>
+                  <keyword> let </keyword>
+                  <identifier> i </identifier>
+                  <symbol> = </symbol>
+                  <expression>
+                    <term>
+                      <identifier> i </identifier>
+                    </term>
+                    <symbol> + </symbol>
+                    <term>
+                      <integerConstant> 1 </integerConstant>
+                    </term>
+                  </expression>
+                  <symbol> ; </symbol>
+                </letStatement>
+              </statements>
+              <symbol> } </symbol>
+              <keyword> else </keyword>
+              <symbol> { </symbol>
+              <statements>
+                <letStatement>
+                  <keyword> let </keyword>
+                  <identifier> i </identifier>
+                  <symbol> = </symbol>
+                  <expression>
+                    <term>
+                      <identifier> i </identifier>
+                    </term>
+                    <symbol> + </symbol>
+                    <term>
+                      <integerConstant> 1 </integerConstant>
+                    </term>
+                  </expression>
+                  <symbol> ; </symbol>
+                </letStatement>
+              </statements>
+              <symbol> } </symbol>
+            </ifStatement>
+        </statements>
+";
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+            @"push local 1
+push constant 8
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 1
+push constant 1
+add
+pop local 1
+label IF_FALSE0
+push local 1
+push constant 1
+add
+pop local 1");
+    }
+
+    [Fact]
+    public void CompileDoStatements()
+    {
+        var source = @"
+            class Cell {
+              field Array _neighbors;
+              field Cell _cell;
+
+              method void test()   {
+                do Memory.deAlloc(_neighbors);
+                do _cell.advance(1);
+                return;
+              }
+            }
+";
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+
+        var statementNodeXml = @"
+        <statements>
+            <doStatement>
+              <keyword> do </keyword>
+              <identifier> Memory </identifier>
+              <symbol> . </symbol>
+              <identifier> deAlloc </identifier>
+              <symbol> ( </symbol>
+              <expressionList>
+                <expression>
+                  <term>
+                    <identifier> _neighbors </identifier>
+                  </term>
+                </expression>
+              </expressionList>
+              <symbol> ) </symbol>
+              <symbol> ; </symbol>
+            </doStatement>
+            <doStatement>
+              <keyword> do </keyword>
+              <identifier> _cell </identifier>
+              <symbol> . </symbol>
+              <identifier> advance </identifier>
+              <symbol> ( </symbol>
+              <expressionList>
+                <expression>
+                  <term>
+                    <integerConstant> 1 </integerConstant>
+                  </term>
+                </expression>
+              </expressionList>
+              <symbol> ) </symbol>
+              <symbol> ; </symbol>
+            </doStatement>
+        </statements>
+";
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
+
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+
+        vmCode1.Should().Be(
+@"push this 0
+call Memory.deAlloc 1
+push constant 1
+push this 1
+pop pointer 0
+call Cell.advance 1");
     }
 }

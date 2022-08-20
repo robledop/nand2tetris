@@ -13,6 +13,8 @@ namespace JackCompiler.JackCodeGenerator
         internal List<Symbol> ClassSymbolTable { get; set; } = new();
         internal List<Symbol> SubroutineSymbolTable { get; set; } = new();
         internal XmlNode ClassNode { get; set; }
+        int _whileCount;
+        int _ifCount;
 
         public CodeGenerator(XmlDocument parseTree)
         {
@@ -67,12 +69,16 @@ namespace JackCompiler.JackCodeGenerator
                     if (childNode.Name is "identifier" or "keyword")
                     {
                         type ??= innerText;
+                        if (childNode.NextSibling.Name == "identifier" && varIdentifiers.Count == 0)
+                        {
+                            varIdentifiers.Add(childNode.NextSibling.InnerText.Trim());
+                        }
                     }
 
-                    if (childNode.Name == "identifier" && varIdentifiers.Count == 0)
-                    {
-                        varIdentifiers.Add(innerText);
-                    }
+                    //if (childNode.Name == "identifier" && varIdentifiers.Count == 0)
+                    //{
+                    //    varIdentifiers.Add(innerText);
+                    //}
                 }
 
                 foreach (var varIdentifier in varIdentifiers)
@@ -84,42 +90,134 @@ namespace JackCompiler.JackCodeGenerator
             }
         }
 
+        internal string CompileStatements(XmlNode statementsNode)
+        {
+            var sb = new StringBuilder();
+
+            foreach (XmlNode statement in statementsNode.ChildNodes)
+            {
+                switch (statement.Name)
+                {
+                    case "letStatement":
+                        sb.Append(CompileLetStatement(statement));
+                        break;
+
+                    case "returnStatement":
+                        sb.Append(CompileReturnStatement(statement));
+                        break;
+
+                    case "ifStatement":
+                        sb.Append(CompileIfStatement(statement));
+                        break;
+
+                    case "whileStatement":
+                        sb.Append(CompileWhileStatement(statement));
+                        break;
+
+                    case "doStatement":
+                        sb.Append(CompileDoStatement(statement));
+                        break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        internal string CompileDoStatement(XmlNode statement)
+        {
+            var sb = new StringBuilder();
+            var expressionList = statement.SelectSingleNode(".//expressionList");
+            var expressions = expressionList.SelectNodes(".//expression");
+            sb.Append(CompileSubroutineCall(statement, expressions));
+
+            return sb.ToString();
+        }
+
+        internal string CompileWhileStatement(XmlNode statement)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"label WHILE_EXP{_whileCount}");
+            var whileExpression = statement.SelectSingleNode("expression");
+            sb.Append(CompileExpression(whileExpression));
+            sb.AppendLine("not");
+            sb.AppendLine($"if-goto WHILE_END{_whileCount}");
+            var statements = statement.SelectSingleNode("statements");
+            sb.Append(CompileStatements(statements));
+
+            sb.AppendLine($"goto WHILE_EXP{_whileCount}");
+            sb.AppendLine($"label WHILE_END{_whileCount}");
+            _whileCount++;
+            return sb.ToString();
+        }
+
+        internal string CompileIfStatement(XmlNode statement)
+        {
+            var sb = new StringBuilder();
+            var expression = statement.SelectSingleNode("expression");
+            sb.Append(CompileExpression(expression));
+            sb.AppendLine($"if-goto IF_TRUE{_ifCount}");
+            sb.AppendLine($"goto IF_FALSE{_ifCount}");
+            sb.AppendLine($"label IF_TRUE{_ifCount}");
+
+            var ifTrueStatements = statement.SelectNodes(".//statements")?.Item(0);
+            if (ifTrueStatements is not null)
+            {
+                sb.Append(CompileStatements(ifTrueStatements));
+            }
+            sb.AppendLine($"label IF_FALSE{_ifCount}");
+            var ifFalseStatements = statement.SelectNodes(".//statements")?.Item(1);
+            if (ifFalseStatements is not null)
+            {
+                sb.Append(CompileStatements(ifFalseStatements));
+            }
+
+            _ifCount++;
+            return sb.ToString();
+        }
+
+        internal string CompileReturnStatement(XmlNode statement)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("return");
+            return sb.ToString();
+        }
+
+        internal string CompileLetStatement(XmlNode letStatementNode)
+        {
+            var sb = new StringBuilder();
+
+            var expression = letStatementNode.SelectSingleNode("expression");
+            sb.Append(CompileExpression(expression));
+
+            var identifierNode = letStatementNode.SelectSingleNode("identifier");
+
+            var identifier = identifierNode.InnerText.Trim();
+            var symbol = SubroutineSymbolTable.FirstOrDefault(s => s.Name == identifier) ??
+                         ClassSymbolTable.FirstOrDefault(s => s.Name == identifier);
+            sb.AppendLine($"pop {GetSegmentName(symbol!.Kind)} {symbol.Position}");
+
+
+            return sb.ToString();
+        }
+
         internal string CompileExpression(XmlNode expressionNode)
         {
             var sb = new StringBuilder();
-            var terms = expressionNode.SelectNodes("//term");
+            var terms = expressionNode.SelectNodes(".//term");
 
             // if exp is "f(exp1, exp2, ...)":
             //      codeWrite(exp1),
             //      codeWrite(exp2), ...,
             //      output "call f"
-            var expressionList = expressionNode.SelectNodes("//expressionList")?.Item(0);
+            var expressionList = expressionNode.SelectNodes(".//expressionList")?.Item(0);
             if (expressionList is not null)
             {
                 var expressions = expressionList.SelectNodes("expression");
-                if (expressions is not null)
-                {
-                    foreach (XmlNode expression in expressions)
-                    {
-                        var expNode = CreateNode(expression?.OwnerDocument, "expression");
-                        expNode.AppendChild(expression.CloneNode(true));
-                        sb.Append(CompileExpression(expNode));
-                    }
-                }
 
                 var firstTerm = terms[0];
-                var identifiers = firstTerm.SelectNodes("identifier");
-                var firstIdentifier = identifiers[0];
 
-                if (firstIdentifier.NextSibling.InnerText.Trim() == ".")
-                {
-                    var secondIdentifier = identifiers[1];
-                    sb.AppendLine($"call {firstIdentifier.InnerText.Trim()}.{secondIdentifier.InnerText.Trim()} {expressions?.Count ?? 0}");
-                }
-                else if(firstIdentifier.NextSibling.InnerText.Trim() == "(")
-                {
-                    sb.AppendLine($"call {firstIdentifier.InnerText.Trim()} {expressions?.Count ?? 0}");
-                }
+                sb.Append(CompileSubroutineCall(firstTerm, expressions));
             }
 
             // if exp is "op exp"
@@ -181,6 +279,47 @@ namespace JackCompiler.JackCodeGenerator
             return sb.ToString();
         }
 
+        internal string CompileSubroutineCall(XmlNode firstTerm, XmlNodeList expressions)
+        {
+            var sb = new StringBuilder();
+
+            if (expressions is not null)
+            {
+                foreach (XmlNode expression in expressions)
+                {
+                    var expNode = CreateNode(expression?.OwnerDocument, "expression");
+                    expNode.AppendChild(expression.CloneNode(true));
+                    sb.Append(CompileExpression(expNode));
+                }
+            }
+
+            var identifiers = firstTerm.SelectNodes("identifier");
+            var firstIdentifierNode = identifiers[0];
+            var firstIdentifier = firstIdentifierNode.InnerText.Trim();
+
+            var symbol = SubroutineSymbolTable.FirstOrDefault(s => s.Name == firstIdentifier) ??
+                         ClassSymbolTable.FirstOrDefault(s => s.Name == firstIdentifier);
+
+            if (symbol is not null)
+            {
+                sb.AppendLine($"push {GetSegmentName(symbol!.Kind)} {symbol.Position}");
+                sb.AppendLine("pop pointer 0");
+                var secondIdentifier = identifiers[1];
+                sb.AppendLine($"call {symbol.Type}.{secondIdentifier?.InnerText.Trim()} {expressions?.Count ?? 0}");
+            }
+            else if (firstIdentifierNode.NextSibling?.InnerText.Trim() == ".")
+            {
+                var secondIdentifier = identifiers[1];
+                sb.AppendLine($"call {firstIdentifierNode.InnerText.Trim()}.{secondIdentifier?.InnerText.Trim()} {expressions?.Count ?? 0}");
+            }
+            else if (firstIdentifierNode.NextSibling?.InnerText.Trim() == "(")
+            {
+                sb.AppendLine($"call {firstIdentifierNode.InnerText.Trim()} {expressions?.Count ?? 0}");
+            }
+
+            return sb.ToString();
+        }
+
         string GetSegmentName(SymbolKind kind)
         {
             return kind switch
@@ -214,8 +353,8 @@ namespace JackCompiler.JackCodeGenerator
                 "=" => "eq",
                 "<" => "lt",
                 ">" => "gt",
-                "*" => "call Math.multiply()",
-                "/" => "call Math.divide()",
+                "*" => "call Math.multiply() 2",
+                "/" => "call Math.divide() 2",
                 _ => throw new NotSupportedException(op)
             };
         }
