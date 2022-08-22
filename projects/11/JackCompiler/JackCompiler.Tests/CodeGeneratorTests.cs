@@ -74,7 +74,7 @@ public class CodeGeneratorTests
         parser.GetTokens(source);
         var parseTree = parser.ParseClass();
         var codeGenerator = new CodeGenerator(parseTree);
-
+        var x = codeGenerator.CompileClass();
         codeGenerator.GenerateClassSymbolTable();
 
         codeGenerator.ClassSymbolTable.Count.Should().Be(1);

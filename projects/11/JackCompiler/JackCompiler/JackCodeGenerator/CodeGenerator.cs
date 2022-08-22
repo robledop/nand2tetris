@@ -345,6 +345,19 @@ namespace JackCompiler.JackCodeGenerator
                     case "keyword" when term.FirstChild.InnerText.Trim() == "this":
                         sb.AppendLine("push pointer 0");
                         break;
+
+                    case "keyword" when term.FirstChild.InnerText.Trim() == "true":
+                        sb.AppendLine("push constant 1");
+                        sb.AppendLine("neg");
+                        break;
+
+                    case "keyword" when term.FirstChild.InnerText.Trim() == "false":
+                        sb.AppendLine("push constant 0");
+                        break;
+
+                    case "keyword" when term.FirstChild.InnerText.Trim() == "null":
+                        sb.AppendLine("push constant 0");
+                        break;
                 }
             }
             else
@@ -469,7 +482,8 @@ namespace JackCompiler.JackCodeGenerator
                 subroutine.SelectNodes("identifier")!.Item(0)!.InnerText.Trim() : 
                 subroutine.SelectNodes("identifier")!.Item(1)!.InnerText.Trim();
 
-            sb.AppendLine($"function {_currentClassIdentifier}.{subroutineIdentifier} {SubroutineSymbolTable.Count}");
+            var argumentCount = _currentSubroutineType == "method" ? SubroutineSymbolTable.Count + 1 : SubroutineSymbolTable.Count;
+            sb.AppendLine($"function {_currentClassIdentifier}.{subroutineIdentifier} {argumentCount}");
 
             SubroutineSymbolTable.Clear();
             AddArgumentsToTheSubroutineSymbolTable(subroutine);
