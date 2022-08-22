@@ -16,4 +16,8 @@
     <Folder Include="JackAnalyzer\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

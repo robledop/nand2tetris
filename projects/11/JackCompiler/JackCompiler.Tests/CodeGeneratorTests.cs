@@ -44,6 +44,7 @@ public class CodeGeneratorTests
         parser.GetTokens(source);
         var parseTree = parser.ParseClass();
         var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
         var constructor = parseTree.SelectSingleNode("//subroutineDec[identifier=' new ']");
 
@@ -127,7 +128,7 @@ public class CodeGeneratorTests
         var codeGenerator = new CodeGenerator(parseTree);
 
         var functionMore = parseTree.SelectSingleNode("//subroutineDec[identifier=' draw ']");
-
+        codeGenerator.CompileClass();
         codeGenerator.CompileSubroutine(functionMore);
 
         codeGenerator.SubroutineSymbolTable.Count.Should().Be(1);
@@ -168,6 +169,7 @@ public class CodeGeneratorTests
         parser.GetTokens(source);
         var parseTree = parser.ParseClass();
         var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
         var functionMain = parseTree.SelectSingleNode("//subroutineDec[identifier=' main ']");
 
@@ -212,6 +214,7 @@ public class CodeGeneratorTests
     {
         var source = @"
             class Square {
+                field int x, y, size;
                constructor Square new(int Ax, int Ay, int Asize) {
                   let x = Ax;
                   let y = Ay;
@@ -409,7 +412,6 @@ call Math.multiply() 2");
 
         vmCode1.Should().Be(
 @"push local 0
-pop pointer 0
 call Cell.getIsAlive 0");
     }
 
@@ -467,10 +469,9 @@ call Cell.getIsAlive 0");
         var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
         vmCode1.Should().Be(
-@"push constant 1
+@"push local 0
+push constant 1
 push local 1
-push local 0
-pop pointer 0
 call Cell.getIsAlive 2");
     }
 
@@ -601,18 +602,18 @@ pop local 2");
         var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
 
         vmCode1.Should().Be(
-            @"label WHILE_EXP0
+            @"label WHILE_EXP1
 push local 1
 push constant 8
 lt
 not
-if-goto WHILE_END0
+if-goto WHILE_END1
 push local 1
 push constant 1
 add
 pop local 1
-goto WHILE_EXP0
-label WHILE_END0");
+goto WHILE_EXP1
+label WHILE_END1");
     }
 
     [Fact]
@@ -711,14 +712,14 @@ label WHILE_END0");
             @"push local 1
 push constant 8
 lt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
 push local 1
 push constant 1
 add
 pop local 1
-label IF_FALSE0
+label IF_FALSE1
 push local 1
 push constant 1
 add
@@ -791,9 +792,10 @@ pop local 1");
         vmCode1.Should().Be(
 @"push this 0
 call Memory.deAlloc 1
-push constant 1
+pop temp 0
 push this 1
-pop pointer 0
-call Cell.advance 1");
+push constant 1
+call Cell.advance 1
+pop temp 0");
     }
 }
