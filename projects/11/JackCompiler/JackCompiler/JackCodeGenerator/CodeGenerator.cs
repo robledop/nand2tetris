@@ -127,7 +127,7 @@ namespace JackCompiler.JackCodeGenerator
         {
             var sb = new StringBuilder();
             var expressionList = statement.SelectSingleNode(".//expressionList");
-            var expressions = expressionList?.SelectNodes(".//expression");
+            var expressions = expressionList?.SelectNodes("expression");
             sb.Append(CompileSubroutineCall(statement, expressions));
             sb.AppendLine("pop temp 0"); // gets rid of the 'void' return value
             return sb.ToString();
@@ -135,43 +135,48 @@ namespace JackCompiler.JackCodeGenerator
 
         internal string CompileWhileStatement(XmlNode statement)
         {
+            var currentWhileCount = _whileCount++;
             var sb = new StringBuilder();
-            sb.AppendLine($"label WHILE_EXP{_whileCount}");
+            sb.AppendLine($"label WHILE_EXP{currentWhileCount}");
             var whileExpression = statement.SelectSingleNode("expression");
             sb.Append(CompileExpression(whileExpression));
             sb.AppendLine("not");
-            sb.AppendLine($"if-goto WHILE_END{_whileCount}");
+            sb.AppendLine($"if-goto WHILE_END{currentWhileCount}");
             var statements = statement.SelectSingleNode("statements");
             sb.Append(CompileStatements(statements));
 
-            sb.AppendLine($"goto WHILE_EXP{_whileCount}");
-            sb.AppendLine($"label WHILE_END{_whileCount}");
-            _whileCount++;
+            sb.AppendLine($"goto WHILE_EXP{currentWhileCount}");
+            sb.AppendLine($"label WHILE_END{currentWhileCount}");
+            
             return sb.ToString();
         }
 
         internal string CompileIfStatement(XmlNode statement)
         {
+            var currentIfCount = _ifCount++;
+
             var sb = new StringBuilder();
             var expression = statement.SelectSingleNode("expression");
             sb.Append(CompileExpression(expression));
-            sb.AppendLine($"if-goto IF_TRUE{_ifCount}");
-            sb.AppendLine($"goto IF_FALSE{_ifCount}");
-            sb.AppendLine($"label IF_TRUE{_ifCount}");
+            sb.AppendLine($"if-goto IF_TRUE{currentIfCount}");
+            sb.AppendLine($"goto IF_FALSE{currentIfCount}");
+            sb.AppendLine($"label IF_TRUE{currentIfCount}");
 
-            var ifTrueStatements = statement.SelectNodes(".//statements")?.Item(0);
+            var ifTrueStatements = statement.SelectNodes("statements")?.Item(0);
             if (ifTrueStatements is not null)
             {
                 sb.Append(CompileStatements(ifTrueStatements));
+                sb.AppendLine($"goto IF_END{currentIfCount}");
             }
-            sb.AppendLine($"label IF_FALSE{_ifCount}");
-            var ifFalseStatements = statement.SelectNodes(".//statements")?.Item(1);
+            sb.AppendLine($"label IF_FALSE{currentIfCount}");
+            var ifFalseStatements = statement.SelectNodes("statements")?.Item(1);
             if (ifFalseStatements is not null)
             {
                 sb.Append(CompileStatements(ifFalseStatements));
+                sb.AppendLine($"label IF_END{currentIfCount}");
             }
 
-            _ifCount++;
+            
             return sb.ToString();
         }
 
@@ -210,12 +215,12 @@ namespace JackCompiler.JackCodeGenerator
             if (symbol.Type == "Array")
             {
                 sb.AppendLine($"push {GetSegmentName(symbol!.Kind)} {symbol.Position}");
-                
+
                 var arrayIndexExpressionNode = letStatementNode.SelectNodes(".//expression").Item(0);
                 sb.Append(CompileExpression(arrayIndexExpressionNode)); // compile expression1
-                
+
                 sb.AppendLine("add"); // top stack value = RAM  address of arr[expression1]
-                
+
                 var expression = letStatementNode.SelectNodes(".//expression").Item(1);
                 sb.Append(CompileExpression(expression));  // compile expression2
 
@@ -232,7 +237,7 @@ namespace JackCompiler.JackCodeGenerator
             {
                 var expression = letStatementNode.SelectSingleNode("expression");
                 sb.Append(CompileExpression(expression));
-               
+
                 sb.AppendLine($"pop {GetSegmentName(symbol!.Kind)} {symbol.Position}");
             }
 
@@ -271,6 +276,11 @@ namespace JackCompiler.JackCodeGenerator
                 {
                     sb.Append(CompileExpression(innerTerm));
                 }
+                else if (innerTerm.SelectSingleNode("expression") is not null)
+                {
+                    var exp = innerTerm.SelectSingleNode("expression");
+                    sb.Append(CompileExpression(exp));
+                }
                 else
                 {
                     var expNode = CreateNode(innerTerm?.OwnerDocument, "expression");
@@ -292,6 +302,11 @@ namespace JackCompiler.JackCodeGenerator
                     if (opTerm.Name == "expression")
                     {
                         sb.Append(CompileExpression(opTerm));
+                    }
+                    else if (opTerm.SelectSingleNode("expression") is not null)
+                    {
+                        var exp = opTerm.SelectSingleNode("expression");
+                        sb.Append(CompileExpression(exp));
                     }
                     else
                     {
@@ -347,8 +362,8 @@ namespace JackCompiler.JackCodeGenerator
                         break;
 
                     case "keyword" when term.FirstChild.InnerText.Trim() == "true":
-                        sb.AppendLine("push constant 1");
-                        sb.AppendLine("neg");
+                        sb.AppendLine("push constant 0");
+                        sb.AppendLine("not");
                         break;
 
                     case "keyword" when term.FirstChild.InnerText.Trim() == "false":
@@ -357,6 +372,17 @@ namespace JackCompiler.JackCodeGenerator
 
                     case "keyword" when term.FirstChild.InnerText.Trim() == "null":
                         sb.AppendLine("push constant 0");
+                        break;
+
+                    case "stringConstant":
+                        var stringConstant = term.FirstChild.InnerText.Trim();
+                        sb.AppendLine($"push constant {stringConstant.Length}");
+                        sb.AppendLine("call String.new 1");
+                        foreach (var character in stringConstant)
+                        {
+                            sb.AppendLine($"push constant {(int)character}");
+                            sb.AppendLine("call String.appendChar 2");
+                        }
                         break;
                 }
             }
@@ -451,8 +477,8 @@ namespace JackCompiler.JackCodeGenerator
                 "=" => "eq",
                 "<" => "lt",
                 ">" => "gt",
-                "*" => "call Math.multiply() 2",
-                "/" => "call Math.divide() 2",
+                "*" => "call Math.multiply 2",
+                "/" => "call Math.divide 2",
                 _ => throw new NotSupportedException(op)
             };
         }
@@ -474,22 +500,26 @@ namespace JackCompiler.JackCodeGenerator
         {
             _currentSubroutineType = subroutine.SelectNodes("keyword")!.Item(0)!.InnerText.Trim();
 
-            var sb = new StringBuilder();
-            var returnTypeNode = subroutine.ChildNodes.Item(1);
-            _currentSubroutineReturnType = returnTypeNode!.InnerText.Trim();
-
-            var subroutineIdentifier = returnTypeNode.Name == "keyword" ? 
-                subroutine.SelectNodes("identifier")!.Item(0)!.InnerText.Trim() : 
-                subroutine.SelectNodes("identifier")!.Item(1)!.InnerText.Trim();
-
-            var argumentCount = _currentSubroutineType == "method" ? SubroutineSymbolTable.Count + 1 : SubroutineSymbolTable.Count;
-            sb.AppendLine($"function {_currentClassIdentifier}.{subroutineIdentifier} {argumentCount}");
-
             SubroutineSymbolTable.Clear();
             AddArgumentsToTheSubroutineSymbolTable(subroutine);
 
             var body = subroutine.SelectSingleNode("subroutineBody");
             AddLocalVariablesToSubroutineSymbolTable(body);
+
+
+            var sb = new StringBuilder();
+            var returnTypeNode = subroutine.ChildNodes.Item(1);
+            _currentSubroutineReturnType = returnTypeNode!.InnerText.Trim();
+
+            var subroutineIdentifier = returnTypeNode.Name == "keyword" ?
+                subroutine.SelectNodes("identifier")!.Item(0)!.InnerText.Trim() :
+                subroutine.SelectNodes("identifier")!.Item(1)!.InnerText.Trim();
+
+            var argumentCount = _currentSubroutineType == "method" ? 
+                SubroutineSymbolTable.Count(s => s.Kind == SymbolKind.Local) + 1 : 
+                SubroutineSymbolTable.Count(s => s.Kind == SymbolKind.Local);
+
+            sb.AppendLine($"function {_currentClassIdentifier}.{subroutineIdentifier} {argumentCount}");
 
             if (_currentSubroutineType == "constructor")
             {
@@ -512,10 +542,13 @@ namespace JackCompiler.JackCodeGenerator
         internal void AddArgumentsToTheSubroutineSymbolTable(XmlNode subroutine)
         {
             // add 'this' to the argument list
-            var classIdentifierNode = ClassNode.SelectSingleNode("identifier");
-            var className = classIdentifierNode!.InnerText.Trim();
-            var @this = new Symbol("this", className, SymbolKind.Argument, 0);
-            SubroutineSymbolTable.Add(@this);
+            if (_currentSubroutineType == "method")
+            {
+                var classIdentifierNode = ClassNode.SelectSingleNode("identifier");
+                var className = classIdentifierNode!.InnerText.Trim();
+                var @this = new Symbol("this", className, SymbolKind.Argument, 0);
+                SubroutineSymbolTable.Add(@this);
+            }
 
             // add the parameters list to the argument list
             var parameterListNode = subroutine.SelectSingleNode("parameterList");

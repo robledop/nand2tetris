@@ -1,0 +1,17 @@
+class Main {
+    function void main () {
+        var int i;
+
+        while (i < 16) {
+            if ((i - 2) > 2) {
+                do Output.printInt(1);
+            } else {
+                do Output.printInt(0);
+            }
+
+            let i = i + 1;
+        }
+        
+        return;
+    }
+}

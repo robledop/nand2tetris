@@ -1,8 +1,7 @@
-﻿using JackCompiler;
-using System;
+﻿using System;
 using System.IO;
-using System.Xml;
 using JackCompiler.JackAnalyzer;
+using JackCompiler.JackCodeGenerator;
 
 if (args.Length == 0)
 {
@@ -23,33 +22,30 @@ if (isDirectory)
     var jackFiles = Directory.EnumerateFiles(path, "*.jack");
     foreach (var file in jackFiles)
     {
-        var xmlFilePath = $"{path}{Path.DirectorySeparatorChar}{Path.GetFileName(file).Replace(".jack", ".xml")}";
-        Console.WriteLine($"Parsing file '{xmlFilePath}'");
-        var xml = ProcessFile(file);
-        if (xml is not null)
-        {
-            xml.Save(xmlFilePath);
-        }
+        Console.WriteLine($"Compiling file '{file}'");
+        var vmFilePath = $"{path}{Path.DirectorySeparatorChar}{Path.GetFileName(file).Replace(".jack", ".vm")}";
+        var vmCode = CompileFile(file);
+        File.WriteAllText(vmFilePath, vmCode);
     }
 }
 else
 {
-    var xmlFilePath = path.Replace(".jack", ".xml", StringComparison.OrdinalIgnoreCase);
-    var xml = ProcessFile(path);
-    if (xml is not null)
-    {
-        xml.Save(xmlFilePath);
-    }
+    var vmFilePath = path.Replace(".jack", ".vm", StringComparison.OrdinalIgnoreCase);
+    var vmCode = CompileFile(path);
+    File.WriteAllText(vmFilePath, vmCode);
 }
 
-static XmlDocument ProcessFile(string path)
+static string CompileFile(string path)
 {
     try
     {
         var source = File.ReadAllText(path);
         var parser = new Parser();
         parser.GetTokens(source);
-        return parser.ParseClass();
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var compiledClass = codeGenerator.CompileClass();
+        return compiledClass;
     }
     catch (Exception e)
     {
