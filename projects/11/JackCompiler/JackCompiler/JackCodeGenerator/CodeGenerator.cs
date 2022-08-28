@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 using JackCompiler.Exceptions;
 
 namespace JackCompiler.JackCodeGenerator
@@ -336,8 +335,8 @@ namespace JackCompiler.JackCodeGenerator
             {
                 var term = terms[0];
 
-                var innerExpressions = term?.SelectNodes("expression"); // expressions between parenthesis 
-                if (innerExpressions?.Count > 0 && term.FirstChild.InnerText.Trim() == "(")
+                var innerExpressions = term?.SelectNodes("expression");
+                if (innerExpressions?.Count > 0 && term.FirstChild.InnerText.Trim() == "(") // expressions between parenthesis 
                 {
                     foreach (XmlNode innerExpression in innerExpressions)
                     {
