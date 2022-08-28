@@ -336,8 +336,8 @@ namespace JackCompiler.JackCodeGenerator
             {
                 var term = terms[0];
 
-                var innerExpressions = term?.SelectNodes("expression");
-                if (innerExpressions?.Count > 0)
+                var innerExpressions = term?.SelectNodes("expression"); // expressions between parenthesis 
+                if (innerExpressions?.Count > 0 && term.FirstChild.InnerText.Trim() == "(")
                 {
                     foreach (XmlNode innerExpression in innerExpressions)
                     {
