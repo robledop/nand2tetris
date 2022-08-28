@@ -27,7 +27,9 @@ class Math {
         let twoToThe[12] = 4096;
         let twoToThe[13] = 8192;
         let twoToThe[14] = 16384;
-        let twoToThe[15] = 32768;
+        //let twoToThe[15] = 32768;
+
+        return;
     }
 
     /** Returns the absolute value of x. */
@@ -60,13 +62,13 @@ class Math {
         let sum = 0;
         let shiftedX = x;
         let i = 0;
-        let w = 15;
+        let w = 16;
 
         while (i < w) {
-            if (bit(y, i)) {
+            if (Math.bit(y, i)) {
                 let sum = sum +  shiftedX;
             }
-            let shiftedX = shiftedX * 2;
+            let shiftedX = shiftedX + shiftedX;
             
             let i = i + 1;
         }
@@ -90,19 +92,19 @@ class Math {
         */
 
         var int q, absX, absY, result;
-        let absX = abs(x);
-        let absY = abs(y);
+        let absX = Math.abs(x);
+        let absY = Math.abs(y);
 
         if (absX > y) {
             return 0;
         }
 
-        let q = divide(absX, 2 * absY);
+        let q = Math.divide(absX, 2 * absY);
         if ((absX - 2 * q * absY) < absY) {
             return 2 * q;
         }
 
-        var let result =  2 * q + 1;
+        let result =  2 * q + 1;
 
         if (result < 0) {
             return 0;
@@ -125,25 +127,25 @@ class Math {
             return y
         */
 
-        var int test1, test2, j, y, i, whileTest;
+        var int test1, j, y, i, whileTest;
         let j = (x / 2) - 1;
         let y = 0;
 
-        let test1 = power(power((y + 2), j), 2);
+        let test1 = Math.power(Math.power((y + 2), j), 2);
 
-        if ((test1 = 0) | test < 0) {
+        if ((test1 = 0) | test1 < 0) {
             return 0;
         }
 
         while (i > 0) {
-            let whileTest = (power(power(x+2), j), 2);
+            let whileTest = Math.power(Math.power(x+2, j), 2);
             if ((whileTest < x) | (whileTest = x)) {
-                let y = y + power(2, j);
+                let y = y + Math.power(2, j);
             }
 
             let i = i -1;
         }
-
+        return y;
     }
 
     /** Returns the greater number. */
@@ -174,7 +176,7 @@ class Math {
 
     // return x^y
     function int power(int x, int y) {
-        var int i, result;
+        var int i, result, test1, test2;
         let i = 0;
         let result = x;
         
