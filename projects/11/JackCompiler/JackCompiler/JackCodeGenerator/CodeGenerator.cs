@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -298,45 +299,80 @@ namespace JackCompiler.JackCodeGenerator
             //      codeWrite(exp1),
             //      codeWrite(exp2),
             //      output "op"
-            else if (terms?.Count == 2)
+            else if (terms?.Count >= 2)
             {
                 var opTerms = expressionNode.SelectNodes("term");
-                foreach (XmlNode opTerm in opTerms)
+
+                var op = 0;
+                for (int i = 0; i < opTerms.Count; i++)
                 {
-                    var identifierNode = opTerm.SelectSingleNode("identifier");
-                    if (opTerm.Name == "expression")
+                    var identifierNode = opTerms[i]?.SelectSingleNode("identifier");
+                    if (opTerms[i]?.Name == "expression")
                     {
-                        sb.Append(CompileExpression(opTerm));
+                        sb.Append(CompileExpression(opTerms[i]));
                     }
                     else if (identifierNode?.NextSibling?.InnerText.Trim() == "[") // array
                     {
-                        var expNode = CreateNode(opTerm.OwnerDocument, "expression");
-                        expNode.AppendChild(opTerm.CloneNode(true));
+                        var expNode = CreateNode(opTerms[i]?.OwnerDocument, "expression");
+                        expNode.AppendChild(opTerms[i].CloneNode(true));
 
                         sb.Append(CompileExpression(expNode));
                     }
-                    else if (opTerm.SelectSingleNode("expression") is not null)
+                    else if (opTerms[i]?.SelectSingleNode("expression") is not null)
                     {
-                        var exp = opTerm.SelectSingleNode("expression");
+                        var exp = opTerms[i]?.SelectSingleNode("expression");
                         sb.Append(CompileExpression(exp));
                     }
                     else
                     {
-                        var expNode1 = CreateNode(opTerm.OwnerDocument, "expression");
-                        expNode1.AppendChild(opTerm.CloneNode(true));
+                        var expNode1 = CreateNode(opTerms[i]?.OwnerDocument, "expression");
+                        expNode1.AppendChild(opTerms[i].CloneNode(true));
                         sb.Append(CompileExpression(expNode1));
+                    }
+
+                    if (i >= 1)
+                    {
+                        var symbol = expressionNode.SelectNodes("symbol")?[op++];
+                        sb.AppendLine(GetOp(symbol?.InnerText.Trim()));
                     }
                 }
 
-                var symbol = expressionNode.SelectNodes("symbol")?[0];
-                sb.AppendLine(GetOp(symbol.InnerText.Trim()));
+                //foreach (XmlNode opTerm in opTerms)
+                //{
+                //    var identifierNode = opTerm.SelectSingleNode("identifier");
+                //    if (opTerm.Name == "expression")
+                //    {
+                //        sb.Append(CompileExpression(opTerm));
+                //    }
+                //    else if (identifierNode?.NextSibling?.InnerText.Trim() == "[") // array
+                //    {
+                //        var expNode = CreateNode(opTerm.OwnerDocument, "expression");
+                //        expNode.AppendChild(opTerm.CloneNode(true));
+
+                //        sb.Append(CompileExpression(expNode));
+                //    }
+                //    else if (opTerm.SelectSingleNode("expression") is not null)
+                //    {
+                //        var exp = opTerm.SelectSingleNode("expression");
+                //        sb.Append(CompileExpression(exp));
+                //    }
+                //    else
+                //    {
+                //        var expNode1 = CreateNode(opTerm.OwnerDocument, "expression");
+                //        expNode1.AppendChild(opTerm.CloneNode(true));
+                //        sb.Append(CompileExpression(expNode1));
+                //    }
+                //}
+
+                //var symbol = expressionNode.SelectNodes("symbol")?[0];
+                //sb.AppendLine(GetOp(symbol?.InnerText.Trim()));
             }
             else if (terms!.Count == 1)
             {
                 var term = terms[0];
 
                 var innerExpressions = term?.SelectNodes("expression");
-                if (innerExpressions?.Count > 0 && term.FirstChild.InnerText.Trim() == "(") // expressions between parenthesis 
+                if (innerExpressions?.Count > 0 && term.FirstChild?.InnerText.Trim() == "(") // expressions between parenthesis 
                 {
                     foreach (XmlNode innerExpression in innerExpressions)
                     {

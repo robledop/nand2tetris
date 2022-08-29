@@ -1,5 +1,5 @@
 function Math.init 0
-push constant 16
+push constant 15
 call Array.new 1
 pop static 0
 push constant 0
@@ -122,6 +122,16 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
+push constant 15
+push static 0
+add
+push constant 16384
+push constant 16384
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
 push constant 0
 return
 function Math.abs 0
@@ -137,18 +147,16 @@ return
 label IF_FALSE0
 push argument 0
 return
-function Math.multiply 4
+function Math.multiply 3
 push constant 0
 pop local 1
 push argument 0
 pop local 2
 push constant 0
 pop local 0
-push constant 16
-pop local 3
 label WHILE_EXP0
 push local 0
-push local 3
+push constant 16
 lt
 not
 if-goto WHILE_END0
@@ -182,8 +190,8 @@ pop local 1
 push argument 1
 call Math.abs 1
 pop local 2
+push local 2
 push local 1
-push argument 1
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -192,34 +200,36 @@ push constant 0
 return
 label IF_FALSE0
 push local 1
-push constant 2
 push local 2
-call Math.multiply 2
+push local 2
+add
 call Math.divide 2
 pop local 0
 push local 1
 push constant 2
-sub
 push local 0
 call Math.multiply 2
 push local 2
 call Math.multiply 2
+sub
 push local 2
 lt
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
-push constant 2
 push local 0
-call Math.multiply 2
-return
+push local 0
+add
+pop local 3
+goto IF_END1
 label IF_FALSE1
-push constant 2
 push local 0
-call Math.multiply 2
+push local 0
+add
 push constant 1
 add
 pop local 3
+label IF_END1
 push local 3
 push constant 0
 lt
@@ -234,98 +244,62 @@ push constant 0
 lt
 push argument 1
 push constant 0
-gt
-and
-push argument 0
-push constant 0
-gt
-push argument 1
-push constant 0
 lt
-and
-or
-push local 3
-push constant 0
 eq
-not
-and
 if-goto IF_TRUE3
 goto IF_FALSE3
 label IF_TRUE3
 push local 3
-neg
-pop local 3
+return
 label IF_FALSE3
 push local 3
+neg
 return
-function Math.sqrt 5
-push argument 0
-push constant 2
-call Math.divide 2
-push constant 1
-sub
-pop local 1
-push constant 0
-pop local 2
-push local 2
-push constant 2
-add
-push local 1
-call Math.power 2
-push constant 2
-call Math.power 2
+function Math.sqrt 3
+push constant 7
 pop local 0
-push local 0
 push constant 0
-eq
+pop local 1
+label WHILE_EXP0
 push local 0
-or
 push constant 0
 lt
+not
+not
+if-goto WHILE_END0
+push local 1
+push constant 2
+push local 0
+call Math.power 2
+add
+push constant 2
+call Math.power 2
+pop local 2
+push local 2
+push argument 0
+gt
+not
+push local 2
+push constant 0
+gt
+and
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push constant 0
-return
+push local 1
+push constant 2
+push local 0
+call Math.power 2
+add
+pop local 1
 label IF_FALSE0
-label WHILE_EXP0
-push local 3
-push constant 0
-gt
-not
-if-goto WHILE_END0
-push argument 0
-push constant 2
-add
-push local 1
-call Math.power 2
-push constant 2
-call Math.power 2
-pop local 4
-push local 4
-push argument 0
-lt
-push local 4
-push argument 0
-eq
-or
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
-push local 2
-push constant 2
-push local 1
-call Math.power 2
-add
-pop local 2
-label IF_FALSE1
-push local 3
+push local 0
 push constant 1
 sub
-pop local 3
+pop local 0
 goto WHILE_EXP0
 label WHILE_END0
-push local 2
+push local 1
 return
 function Math.max 0
 push argument 0
@@ -365,8 +339,8 @@ push constant 0
 eq
 not
 return
-function Math.power 4
-push constant 0
+function Math.power 2
+push constant 1
 pop local 0
 push argument 0
 pop local 1
@@ -379,12 +353,20 @@ label IF_TRUE0
 push constant 1
 return
 label IF_FALSE0
+push argument 1
+push constant 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push argument 0
+return
+label IF_FALSE1
 label WHILE_EXP0
 push local 0
 push argument 1
-push constant 1
-sub
-lt
+eq
+not
 not
 if-goto WHILE_END0
 push local 1

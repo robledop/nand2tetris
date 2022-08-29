@@ -4095,4 +4095,616 @@ push constant 0
 return
 ");
 	}
+
+	[Fact]
+	public void CompileMath()
+	{
+		var source = @"
+			// This file is part of www.nand2tetris.org
+			// and the book ""The Elements of Computing Systems""
+			// by Nisan and Schocken, MIT Press.
+			// File name: projects/12/Math.jack
+
+			/**
+			 * A library of commonly used mathematical functions.
+			 * Note: Jack compilers implement multiplication and division using OS method calls.
+			 */
+			class Math {
+				static Array twoToThe;
+				/** Initializes the library. */
+				function void init() {
+					let twoToThe = Array.new(16);
+					let twoToThe[0] = 1;
+					let twoToThe[1] = 2;
+					let twoToThe[2] = 4;
+					let twoToThe[3] = 8;
+					let twoToThe[4] = 16;
+					let twoToThe[5] = 32;
+					let twoToThe[6] = 64;
+					let twoToThe[7] = 128;
+					let twoToThe[8] = 256;
+					let twoToThe[9] = 512;
+					let twoToThe[10] = 1024;
+					let twoToThe[11] = 2048;
+					let twoToThe[12] = 4096;
+					let twoToThe[13] = 8192;
+					let twoToThe[14] = 16384;
+					//let twoToThe[15] = 32768;
+
+					return;
+				}
+
+				/** Returns the absolute value of x. */
+				function int abs(int x) {
+					if (x < 0) {
+						return -x;
+					}
+
+					return x;
+				}
+
+				/** Returns the product of x and y. 
+				 *  When a Jack compiler detects the multiplication operator '*' in the 
+				 *  program's code, it handles it by invoking this method. In other words,
+				 *  the Jack expressions x*y and multiply(x,y) return the same value.
+				 */
+				function int multiply(int x, int y) {
+					/*
+						multiply (x, y):
+							sum = 0
+							shiftedX = x
+							for i = 0 ... w - 1 do
+								if ((i'th bit of y) == 1)
+									sum = sum + shiftedX
+								shiftedX = shiftedX * 2
+							return sum
+					*/
+
+					var int i, sum, shiftedX, w;
+					let sum = 0;
+					let shiftedX = x;
+					let i = 0;
+					let w = 16;
+
+					while (i < w) {
+						if (Math.bit(y, i)) {
+							let sum = sum +  shiftedX;
+						}
+						let shiftedX = shiftedX + shiftedX;
+						
+						let i = i + 1;
+					}
+
+					return sum;
+				}
+
+				/** Returns the integer part of x/y.
+				 *  When a Jack compiler detects the multiplication operator '/' in the 
+				 *  program's code, it handles it by invoking this method. In other words,
+				 *  the Jack expressions x/y and divide(x,y) return the same value.
+				 */
+				function int divide(int x, int y) {
+					/*
+						if (x > y) return 0
+						q = divide(x, 2 * y)
+						if ((x - 2 * q * y) < y)
+							return 2 * q
+						else
+							return 2 * q + 1
+					*/
+
+					var int q, absX, absY, result;
+					let absX = Math.abs(x);
+					let absY = Math.abs(y);
+
+					if (absX > y) {
+						return 0;
+					}
+
+					let q = Math.divide(absX, 2 * absY);
+					if (((absX - 2) * (q * absY)) < absY) {
+						return 2 * q;
+					}
+
+					let result =  2 * q + 1;
+
+					if (result < 0) {
+						return 0;
+					}
+
+					if ((((x < 0) & (y > 0)) | ((x > 0) & (y < 0))) & ~(result = 0)) {
+						let result = -result;
+					}
+					return result;
+				}
+
+				/** Returns the integer part of the square root of x. */
+				function int sqrt(int x) {
+					/*
+						sqrt (x):
+							y = 0
+							for j = x/2 -1 ...0 do
+								if (x + 2^j)^2 <= x then y = y + 2^j
+
+						return y
+					*/
+
+					var int test1, j, y, i, whileTest;
+					let j = (x / 2) - 1;
+					let y = 0;
+
+					let test1 = Math.power(Math.power((y + 2), j), 2);
+
+					if ((test1 = 0) | test1 < 0) {
+						return 0;
+					}
+
+					while (i > 0) {
+						let whileTest = Math.power(Math.power(x+2, j), 2);
+						if ((whileTest < x) | (whileTest = x)) {
+							let y = y + Math.power(2, j);
+						}
+
+						let i = i -1;
+					}
+					return y;
+				}
+
+				/** Returns the greater number. */
+				function int max(int a, int b) {
+					if (a > b) {
+						return a;
+					}
+
+					return b;
+				}
+
+				/** Returns the smaller number. */
+				function int min(int a, int b) {
+					if (a < b) {
+						return a;
+					}
+
+					return b;
+				}
+
+				// Returns true if the i-th bit of x is 1, false otherwise
+				function boolean bit(int x, int i){
+					var int bit;
+					let bit = x & twoToThe[i];
+
+					return ~(bit = 0);
+				}
+
+				// return x^y
+				function int power(int x, int y) {
+					var int i, result, test1, test2;
+					let i = 0;
+					let result = x;
+					
+					if (y = 0) {
+						return 1;
+					}
+
+					while (i < (y - 1)) {
+						let result = result * x;
+						let i = i + 1;
+					}
+
+					return result;
+				}
+			}
+
+			";
+
+		var parser = new Parser();
+		parser.GetTokens(source);
+		var parseTree = parser.ParseClass();
+		var codeGenerator = new CodeGenerator(parseTree);
+		var vmCode = codeGenerator.CompileClass();
+
+		vmCode.Should().Be(
+			@"function Math.init 0
+push constant 16
+call Array.new 1
+pop static 0
+push constant 0
+push static 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push static 0
+add
+push constant 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 2
+push static 0
+add
+push constant 4
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 3
+push static 0
+add
+push constant 8
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 4
+push static 0
+add
+push constant 16
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 5
+push static 0
+add
+push constant 32
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 6
+push static 0
+add
+push constant 64
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 7
+push static 0
+add
+push constant 128
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 8
+push static 0
+add
+push constant 256
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 9
+push static 0
+add
+push constant 512
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 10
+push static 0
+add
+push constant 1024
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 11
+push static 0
+add
+push constant 2048
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 12
+push static 0
+add
+push constant 4096
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 13
+push static 0
+add
+push constant 8192
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 14
+push static 0
+add
+push constant 16384
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Math.abs 0
+push argument 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+neg
+return
+label IF_FALSE0
+push argument 0
+return
+function Math.multiply 4
+push constant 0
+pop local 1
+push argument 0
+pop local 2
+push constant 0
+pop local 0
+push constant 16
+pop local 3
+label WHILE_EXP0
+push local 0
+push local 3
+lt
+not
+if-goto WHILE_END0
+push argument 1
+push local 0
+call Math.bit 2
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 1
+push local 2
+add
+pop local 1
+label IF_FALSE0
+push local 2
+push local 2
+add
+pop local 2
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 1
+return
+function Math.divide 4
+push argument 0
+call Math.abs 1
+pop local 1
+push argument 1
+call Math.abs 1
+pop local 2
+push local 1
+push argument 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+push local 1
+push constant 2
+push local 2
+call Math.multiply 2
+call Math.divide 2
+pop local 0
+push local 1
+push constant 2
+sub
+push local 0
+push local 2
+call Math.multiply 2
+call Math.multiply 2
+push local 2
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 2
+push local 0
+call Math.multiply 2
+return
+label IF_FALSE1
+push constant 2
+push local 0
+call Math.multiply 2
+push constant 1
+add
+pop local 3
+push local 3
+push constant 0
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 0
+return
+label IF_FALSE2
+push argument 0
+push constant 0
+lt
+push argument 1
+push constant 0
+gt
+and
+push argument 0
+push constant 0
+gt
+push argument 1
+push constant 0
+lt
+and
+or
+push local 3
+push constant 0
+eq
+not
+and
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 3
+neg
+pop local 3
+label IF_FALSE3
+push local 3
+return
+function Math.sqrt 5
+push argument 0
+push constant 2
+call Math.divide 2
+push constant 1
+sub
+pop local 1
+push constant 0
+pop local 2
+push local 2
+push constant 2
+add
+push local 1
+call Math.power 2
+push constant 2
+call Math.power 2
+pop local 0
+push local 0
+push constant 0
+eq
+push local 0
+or
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+return
+label IF_FALSE0
+label WHILE_EXP0
+push local 3
+push constant 0
+gt
+not
+if-goto WHILE_END0
+push argument 0
+push constant 2
+add
+push local 1
+call Math.power 2
+push constant 2
+call Math.power 2
+pop local 4
+push local 4
+push argument 0
+lt
+push local 4
+push argument 0
+eq
+or
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 2
+push constant 2
+push local 1
+call Math.power 2
+add
+pop local 2
+label IF_FALSE1
+push local 3
+push constant 1
+sub
+pop local 3
+goto WHILE_EXP0
+label WHILE_END0
+push local 2
+return
+function Math.max 0
+push argument 0
+push argument 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+return
+label IF_FALSE0
+push argument 1
+return
+function Math.min 0
+push argument 0
+push argument 1
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+return
+label IF_FALSE0
+push argument 1
+return
+function Math.bit 1
+push argument 0
+push argument 1
+push static 0
+add
+pop pointer 1
+push that 0
+and
+pop local 0
+push local 0
+push constant 0
+eq
+not
+return
+function Math.power 4
+push constant 0
+pop local 0
+push argument 0
+pop local 1
+push argument 1
+push constant 0
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 1
+return
+label IF_FALSE0
+label WHILE_EXP0
+push local 0
+push argument 1
+push constant 1
+sub
+lt
+not
+if-goto WHILE_END0
+push local 1
+push argument 0
+call Math.multiply 2
+pop local 1
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 1
+return
+");
+	}
 }
