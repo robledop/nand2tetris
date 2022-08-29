@@ -11,7 +11,7 @@ class Math {
     static Array twoToThe;
     /** Initializes the library. */
     function void init() {
-        let twoToThe = Array.new(15);
+        let twoToThe = Array.new(16);
         let twoToThe[0] = 1;
         let twoToThe[1] = 2;
         let twoToThe[2] = 4;

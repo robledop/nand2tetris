@@ -11,7 +11,7 @@ class Math {
     static Array twoToThe;
     /** Initializes the library. */
     function void init() {
-        let twoToThe = Array.new(16);
+        let twoToThe = Array.new(15);
         let twoToThe[0] = 1;
         let twoToThe[1] = 2;
         let twoToThe[2] = 4;
@@ -27,7 +27,9 @@ class Math {
         let twoToThe[12] = 4096;
         let twoToThe[13] = 8192;
         let twoToThe[14] = 16384;
-        let twoToThe[15] = 32768;
+        let twoToThe[15] = 16384 + 16384;
+
+        return;
     }
 
     /** Returns the absolute value of x. */
@@ -56,17 +58,16 @@ class Math {
                 return sum
         */
 
-        var int i, sum, shiftedX, w;
+        var int i, sum, shiftedX;
         let sum = 0;
         let shiftedX = x;
         let i = 0;
-        let w = 15;
 
-        while (i < w) {
-            if (bit(y, i)) {
-                let sum = sum +  shiftedX;
+        while (i < 16) {
+            if (Math.bit(y, i)) {
+                let sum = sum + shiftedX;
             }
-            let shiftedX = shiftedX * 2;
+            let shiftedX = shiftedX + shiftedX;
             
             let i = i + 1;
         }
@@ -90,28 +91,28 @@ class Math {
         */
 
         var int q, absX, absY, result;
-        let absX = abs(x);
-        let absY = abs(y);
+        let absX = Math.abs(x);
+        let absY = Math.abs(y);
 
-        if (absX > y) {
-            return 0;
+        if (absY > absX) {
+           return 0;
         }
 
-        let q = divide(absX, 2 * absY);
-        if ((absX - 2 * q * absY) < absY) {
-            return 2 * q;
+        let q = Math.divide(absX, absY + absY);
+        if ((absX - (2 * q * absY)) < absY) {
+            let result =  q + q;
+        }else{
+            let result =  q + q + 1;
         }
-
-        var let result =  2 * q + 1;
 
         if (result < 0) {
             return 0;
         }
 
-        if ((((x < 0) & (y > 0)) | ((x > 0) & (y < 0))) & ~(result = 0)) {
-            let result = -result;
+        if (((x < 0) = (y < 0))) {
+            return result;
         }
-        return result;
+        return -result;
     }
 
     /** Returns the integer part of the square root of x. */
@@ -119,31 +120,25 @@ class Math {
         /*
             sqrt (x):
                 y = 0
-                for j = x/2 -1 ...0 do
-                    if (x + 2^j)^2 <= x then y = y + 2^j
+                for j = n/2 -1 ...0 do
+                    if (y + 2^j)^2 <= x then y = y + 2^j
 
             return y
         */
 
-        var int test1, test2, j, y, i, whileTest;
-        let j = (x / 2) - 1;
+        var int j, y, test;
+        let j = 7;  // (16 / 2) - 1
         let y = 0;
 
-        let test1 = power(power((y + 2), j), 2);
-
-        if ((test1 = 0) | test < 0) {
-            return 0;
-        }
-
-        while (i > 0) {
-            let whileTest = (power(power(x+2), j), 2);
-            if ((whileTest < x) | (whileTest = x)) {
-                let y = y + power(2, j);
+        while (~(j < 0)) {
+            let test = Math.power(y + twoToThe[j], 2);
+            if (~(test > x) & (test > 0)) {
+                let y = y + twoToThe[j];
             }
 
-            let i = i -1;
+            let j = j - 1;
         }
-
+        return y;
     }
 
     /** Returns the greater number. */
@@ -173,16 +168,20 @@ class Math {
     }
 
     // return x^y
-    function int power(int x, int y) {
+    function int power(int x, int pow) {
         var int i, result;
-        let i = 0;
+        let i = 1;
         let result = x;
         
-        if (y = 0) {
+        if (pow = 0) {
             return 1;
         }
 
-        while (i < (y - 1)) {
+        if (pow = 1) {
+            return x;
+        }
+
+        while (~(i = pow)) {
             let result = result * x;
             let i = i + 1;
         }

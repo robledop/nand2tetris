@@ -268,9 +268,11 @@ not
 not
 if-goto WHILE_END0
 push local 1
-push constant 2
 push local 0
-call Math.power 2
+push static 0
+add
+pop pointer 1
+push that 0
 add
 push constant 2
 call Math.power 2
@@ -287,9 +289,11 @@ if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
 push local 1
-push constant 2
 push local 0
-call Math.power 2
+push static 0
+add
+pop pointer 1
+push that 0
 add
 pop local 1
 label IF_FALSE0

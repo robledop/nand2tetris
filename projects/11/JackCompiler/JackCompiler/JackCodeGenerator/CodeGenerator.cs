@@ -336,36 +336,6 @@ namespace JackCompiler.JackCodeGenerator
                         sb.AppendLine(GetOp(symbol?.InnerText.Trim()));
                     }
                 }
-
-                //foreach (XmlNode opTerm in opTerms)
-                //{
-                //    var identifierNode = opTerm.SelectSingleNode("identifier");
-                //    if (opTerm.Name == "expression")
-                //    {
-                //        sb.Append(CompileExpression(opTerm));
-                //    }
-                //    else if (identifierNode?.NextSibling?.InnerText.Trim() == "[") // array
-                //    {
-                //        var expNode = CreateNode(opTerm.OwnerDocument, "expression");
-                //        expNode.AppendChild(opTerm.CloneNode(true));
-
-                //        sb.Append(CompileExpression(expNode));
-                //    }
-                //    else if (opTerm.SelectSingleNode("expression") is not null)
-                //    {
-                //        var exp = opTerm.SelectSingleNode("expression");
-                //        sb.Append(CompileExpression(exp));
-                //    }
-                //    else
-                //    {
-                //        var expNode1 = CreateNode(opTerm.OwnerDocument, "expression");
-                //        expNode1.AppendChild(opTerm.CloneNode(true));
-                //        sb.Append(CompileExpression(expNode1));
-                //    }
-                //}
-
-                //var symbol = expressionNode.SelectNodes("symbol")?[0];
-                //sb.AppendLine(GetOp(symbol?.InnerText.Trim()));
             }
             else if (terms!.Count == 1)
             {
