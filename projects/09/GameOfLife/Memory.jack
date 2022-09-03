@@ -1,0 +1,148 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static Array ram;
+    static Array heap;
+    static int freeList;
+    static int HEAP_BASE;
+    static int LENGTH;
+    static int NEXT;
+
+    /** Initializes the class. */
+    function void init() {
+        /*
+            freeList =  heapBase
+            freeList.next = 0
+            freeList.length = heapSize
+        */
+
+        // constants
+        let HEAP_BASE = 2048;
+        let LENGTH = 0;
+        let NEXT = 1;
+
+        let ram = 0;
+        let freeList = HEAP_BASE;
+        let heap = HEAP_BASE;
+
+        let heap[NEXT] = null; 
+        let heap[LENGTH] = 14334;
+
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        /*
+            + Search freeList using best-fit or first-fit heuristics
+              to obtain a segment with segment.size >= size + 2
+            + If not such segment is found, return failure (or attempt defrag)
+            + block = base address of the found space
+            + Update the freeList and the fields of block to account
+              for the allocation
+            + return block
+        */
+        
+        var int nextBlock;
+        var int currentSize;
+        var int block;
+        
+        let heap = freeList;
+        let currentSize = heap[LENGTH];
+        
+        // first fit
+        while ((~(heap = null)) & (currentSize < (size + 2))) {
+            let heap = heap[NEXT];
+            let currentSize = heap[LENGTH];
+        }
+        
+        if (heap = null) {
+            do Sys.error(6);
+        }
+        
+        // update heap size by removing the newly allocated space from it 
+        let heap[LENGTH] = currentSize - (size + 2); // this is later left behind, without a variable pointing to it
+        
+        /*
+            heap is still pointing to the same address of freeList (on the first run)
+            heap : 
+            | LENGTH | NEXT | +++++++++++++ currentSize +++++++++++++++| <<<< - (size + 2)
+        */
+
+        // create new block at the end of the heap
+        let block = (heap + currentSize + 2) - size;
+
+        /*
+            heap :                                                            block
+            | LENGTH | NEXT | +++++++++++++ currentSize +++++++++++++++| + 2 | ++ size ++ |
+        */
+
+        let heap = block - 2;
+
+        /*
+            originalHeap:                                              heap  block           
+            | LENGTH | NEXT | +++++++++++++ currentSize +++++++++++++++| +2 | ++ size ++ |
+        */
+
+        let heap[NEXT] = null;
+        let heap[LENGTH] = size;
+
+        /*
+            originalHeap                                               heap                    block            
+            | LENGTH | NEXT | +++++++++++++ currentSize +++++++++++++++| LENGTH | NEXT => null | ++ size ++ |
+        */
+
+
+        return block;
+      
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array object) {
+        // Append object to the end of the freeList
+
+        let heap = object - 2;
+        
+        /*
+            heap                                           freeList
+            | NEXT | LENGTH | object |
+        */
+
+        let heap[NEXT] = freeList;
+
+        /*
+            heap                                           freeList 
+            | NEXT => freeList | LENGTH | object |
+        */
+
+        let freeList = heap;
+
+        /*
+            freeList                                       oldFreeList
+            | NEXT => oldFreeList | LENGTH | object |
+        */
+
+        return;
+    }
+}
