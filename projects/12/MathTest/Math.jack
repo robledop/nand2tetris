@@ -32,6 +32,12 @@ class Math {
         return;
     }
 
+     // Returns true if the i-th bit of x is 1, false otherwise
+    function boolean bit(int x, int i) {
+        return ~((x & twoToThe[i]) = 0);
+    }
+
+
     /** Returns the absolute value of x. */
     function int abs(int x) {
         if (x < 0) {
@@ -75,6 +81,7 @@ class Math {
         return sum;
     }
 
+    
     /** Returns the integer part of x/y.
      *  When a Jack compiler detects the multiplication operator '/' in the 
      *  program's code, it handles it by invoking this method. In other words,
@@ -90,23 +97,17 @@ class Math {
                 return 2 * q + 1
         */
 
-        var int q, absX, absY, result;
-        let absX = Math.abs(x);
-        let absY = Math.abs(y);
+        var int q, result;
+        let x = Math.abs(x);
+        let y = Math.abs(y);
 
-        if (absY > absX) {
-           return 0;
-        }
+        if (y > x) { return 0; }
 
-        let q = Math.divide(absX, absY + absY);
-        if ((absX - (2 * q * absY)) < absY) {
+        let q = Math.divide(x, y + y);
+        if ((x - (2 * q * y)) < y) {
             let result =  q + q;
-        }else{
+        } else {
             let result =  q + q + 1;
-        }
-
-        if (result < 0) {
-            return 0;
         }
 
         if (((x < 0) = (y < 0))) {
@@ -126,14 +127,15 @@ class Math {
             return y
         */
 
-        var int j, y, test;
+        var int j, y, test, testQ;
         let j = 7;  // (16 / 2) - 1
         let y = 0;
 
         while (~(j < 0)) {
-            let test = Math.power(y + twoToThe[j], 2);
-            if (~(test > x) & (test > 0)) {
-                let y = y + twoToThe[j];
+            let test = (y + twoToThe[j]);
+            let testQ =  test * test;
+            if (~(testQ > x) & (testQ > 0)) {
+                let y = test;
             }
 
             let j = j - 1;
@@ -159,14 +161,10 @@ class Math {
         return b;
     }
 
-    // Returns true if the i-th bit of x is 1, false otherwise
-    function boolean bit(int x, int i){
-        var int bit;
-        let bit = x & twoToThe[i];
-
-        return ~(bit = 0);
+    function int twoToThe(int i){
+        return twoToThe[i];
     }
-
+   
     // return x^y
     function int power(int x, int pow) {
         var int i, result;
