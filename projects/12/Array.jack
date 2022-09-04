@@ -15,9 +15,11 @@ class Array {
 
     /** Constructs a new Array of the given size. */
     function Array new(int size) {
+        return;
     }
 
     /** Disposes this array. */
     method void dispose() {
+        return;
     }
 }
