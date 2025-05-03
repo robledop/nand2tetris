@@ -8,7 +8,7 @@ public class LexerTests
     [Fact]
     public void ArrayTest()
     {
-        string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\ArrayTest\", "Main.jack");
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "ArrayTest", "Main.jack");
         var source = File.ReadAllText(path);
         var sut = new Lexer(source);
 
@@ -27,7 +27,7 @@ public class LexerTests
     [Fact]
     public void SquareGame()
     {
-        string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "SquareGame.jack");
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource","Square", "SquareGame.jack");
         var source = File.ReadAllText(path);
         var sut = new Lexer(source);
 

@@ -7,203 +7,201 @@ namespace JackCompiler.Tests;
 
 public class CodeGeneratorTests
 {
+    [Fact]
+    public void Square_GenerateClassSymbolTable()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "Square", "Square.jack");
+        var source = File.ReadAllText(path);
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+
+        codeGenerator.GenerateClassSymbolTable();
+
+        codeGenerator.ClassSymbolTable.Count.Should().Be(3);
+
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("x", "int", SymbolKind.Field, 0),
+            new Symbol("y", "int", SymbolKind.Field, 1),
+            new Symbol("size", "int", SymbolKind.Field, 2),
+        };
+
+        codeGenerator.ClassSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
+
+    [Fact]
+    public void Square_GenerateSubroutineSymbolTable()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "Square", "Square.jack");
+        var source = File.ReadAllText(path);
+
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
+
+        var constructor = parseTree.SelectSingleNode("//subroutineDec[identifier=' new ']");
+
+        codeGenerator.CompileSubroutine(constructor);
 
 
-	[Fact]
-	public void Square_GenerateClassSymbolTable()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Square.jack");
-		var source = File.ReadAllText(path);
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("Ax", "int", SymbolKind.Argument, 0),
+            new Symbol("Ay", "int", SymbolKind.Argument, 1),
+            new Symbol("Asize", "int", SymbolKind.Argument, 2)
+        };
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
 
-		codeGenerator.GenerateClassSymbolTable();
+    [Fact]
+    public void SquareMain_GenerateClassSymbolTable()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "Square", "Main.jack");
 
-		codeGenerator.ClassSymbolTable.Count.Should().Be(3);
+        var source = File.ReadAllText(path);
 
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("x", "int", SymbolKind.Field, 0),
-			new Symbol("y", "int", SymbolKind.Field, 1),
-			new Symbol("size", "int", SymbolKind.Field, 2),
-		};
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.GenerateClassSymbolTable();
 
-		codeGenerator.ClassSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
+        codeGenerator.ClassSymbolTable.Count.Should().Be(1);
 
-	[Fact]
-	public void Square_GenerateSubroutineSymbolTable()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Square.jack");
-		var source = File.ReadAllText(path);
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("test", "boolean", SymbolKind.Static, 0)
+        };
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        codeGenerator.ClassSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
 
-		var constructor = parseTree.SelectSingleNode("//subroutineDec[identifier=' new ']");
+    [Fact]
+    public void SquareMain_GenerateSubroutineSymbolTable_more()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "Square", "Main.jack");
+        var source = File.ReadAllText(path);
 
-		codeGenerator.CompileSubroutine(constructor);
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
 
+        var functionMore = parseTree.SelectSingleNode("//subroutineDec[identifier=' more ']");
 
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("Ax", "int", SymbolKind.Argument, 0),
-			new Symbol("Ay", "int", SymbolKind.Argument, 1),
-			new Symbol("Asize", "int", SymbolKind.Argument, 2)
-		};
+        codeGenerator.CompileSubroutine(functionMore);
 
-		codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("i", "int", SymbolKind.Local, 0),
+            new Symbol("j", "int", SymbolKind.Local, 1),
+            new Symbol("s", "String", SymbolKind.Local, 2),
+            new Symbol("a", "Array", SymbolKind.Local, 3),
+        };
 
-	[Fact]
-	public void SquareMain_GenerateClassSymbolTable()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Main.jack");
+        codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
 
-		var source = File.ReadAllText(path);
+    [Fact]
+    public void Square_GenerateSubroutineSymbolTable_draw()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "Square", "Square.jack");
+        var source = File.ReadAllText(path);
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.GenerateClassSymbolTable();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
 
-		codeGenerator.ClassSymbolTable.Count.Should().Be(1);
+        var functionMore = parseTree.SelectSingleNode("//subroutineDec[identifier=' draw ']");
+        codeGenerator.CompileClass();
+        codeGenerator.CompileSubroutine(functionMore);
 
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("test", "boolean", SymbolKind.Static, 0)
-		};
+        codeGenerator.SubroutineSymbolTable.Count.Should().Be(1);
 
-		codeGenerator.ClassSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("this", "Square", SymbolKind.Argument, 0),
+        };
 
-	[Fact]
-	public void SquareMain_GenerateSubroutineSymbolTable_more()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Main.jack");
-		var source = File.ReadAllText(path);
+        codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
+    [Fact]
+    public void ArrayTestMain_GenerateClassSymbolTable()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "ArrayTest", "Main.jack");
 
-		var functionMore = parseTree.SelectSingleNode("//subroutineDec[identifier=' more ']");
+        var source = File.ReadAllText(path);
 
-		codeGenerator.CompileSubroutine(functionMore);
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
 
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("i", "int", SymbolKind.Local, 0),
-			new Symbol("j", "int", SymbolKind.Local, 1),
-			new Symbol("s", "String", SymbolKind.Local, 2),
-			new Symbol("a", "Array", SymbolKind.Local, 3),
-		};
+        codeGenerator.GenerateClassSymbolTable();
 
-		codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
+        codeGenerator.ClassSymbolTable.Count.Should().Be(0);
+    }
 
-	[Fact]
-	public void Square_GenerateSubroutineSymbolTable_draw()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\Square\", "Square.jack");
-		var source = File.ReadAllText(path);
+    [Fact]
+    public void ArrayTestMain_GenerateSubroutineSymbolTable()
+    {
+        string path = Path.Combine(Environment.CurrentDirectory, "TestSource", "ArrayTest", "Main.jack");
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
+        var source = File.ReadAllText(path);
 
-		var functionMore = parseTree.SelectSingleNode("//subroutineDec[identifier=' draw ']");
-		codeGenerator.CompileClass();
-		codeGenerator.CompileSubroutine(functionMore);
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		codeGenerator.SubroutineSymbolTable.Count.Should().Be(1);
+        var functionMain = parseTree.SelectSingleNode("//subroutineDec[identifier=' main ']");
 
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("this", "Square", SymbolKind.Argument, 0),
-		};
+        codeGenerator.CompileSubroutine(functionMain);
 
-		codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
+        var compareTo = new List<Symbol>
+        {
+            new Symbol("a", "Array", SymbolKind.Local, 0),
+            new Symbol("length", "int", SymbolKind.Local, 1),
+            new Symbol("i", "int", SymbolKind.Local, 2),
+            new Symbol("sum", "int", SymbolKind.Local, 3),
+        };
 
-	[Fact]
-	public void ArrayTestMain_GenerateClassSymbolTable()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\ArrayTest\", "Main.jack");
+        codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
+    }
 
-		var source = File.ReadAllText(path);
-
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-
-		codeGenerator.GenerateClassSymbolTable();
-
-		codeGenerator.ClassSymbolTable.Count.Should().Be(0);
-	}
-
-	[Fact]
-	public void ArrayTestMain_GenerateSubroutineSymbolTable()
-	{
-		string path = Path.Combine(Environment.CurrentDirectory, @"TestSource\ArrayTest\", "Main.jack");
-
-		var source = File.ReadAllText(path);
-
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
-
-		var functionMain = parseTree.SelectSingleNode("//subroutineDec[identifier=' main ']");
-
-		codeGenerator.CompileSubroutine(functionMain);
-
-		var compareTo = new List<Symbol>
-		{
-			new Symbol("a", "Array", SymbolKind.Local, 0),
-			new Symbol("length", "int", SymbolKind.Local, 1),
-			new Symbol("i", "int", SymbolKind.Local, 2),
-			new Symbol("sum", "int", SymbolKind.Local, 3),
-		};
-
-		codeGenerator.SubroutineSymbolTable.Should().BeEquivalentTo(compareTo);
-	}
-
-	[Fact]
-	public void CompileExpression_IntegerConstant()
-	{
-		var expressionNodeXml = @"
+    [Fact]
+    public void CompileExpression_IntegerConstant()
+    {
+        var expressionNodeXml = @"
 			<expression>
 				<term>
 					<integerConstant> 10 </integerConstant>
 				</term>
 			</expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml);
 
-		var codeGenerator = new CodeGenerator(xmlDocument);
+        var codeGenerator = new CodeGenerator(xmlDocument);
 
-		var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode.Should().Be("push constant 10");
-	}
+        vmCode.Should().Be("push constant 10");
+    }
 
-	[Fact]
-	public void CompileExpression_Argument()
-	{
-		var source = @"
+    [Fact]
+    public void CompileExpression_Argument()
+    {
+        var source = @"
 			class Square {
 				field int x, y, size;
 			   constructor Square new(int Ax, int Ay, int Asize) {
@@ -215,44 +213,44 @@ public class CodeGeneratorTests
 			}
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var expressionNodeXml1 = @"
+        var expressionNodeXml1 = @"
 		   <expression>
 			<term>
 			  <identifier> Ax </identifier>
 			</term>
 		  </expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml1);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be("push argument 0");
+        vmCode1.Should().Be("push argument 0");
 
-		var expressionNodeXml2 = @"
+        var expressionNodeXml2 = @"
 			<expression>
 				<term>
 					<identifier> Ay </identifier>
 				</term>
 			</expression>";
-		xmlDocument.LoadXml(expressionNodeXml2);
+        xmlDocument.LoadXml(expressionNodeXml2);
 
-		var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode2.Should().Be("push argument 1");
-	}
+        vmCode2.Should().Be("push argument 1");
+    }
 
-	[Fact]
-	public void CompileExpression_UnaryOp()
-	{
-		var source = @"
+    [Fact]
+    public void CompileExpression_UnaryOp()
+    {
+        var source = @"
 			class Main {
 				function void more() { 
 					var int i, j;      
@@ -262,11 +260,11 @@ public class CodeGeneratorTests
 			}
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var expressionNodeXml1 = @"
+        var expressionNodeXml1 = @"
 		   <expression>
 				<term>
 					<symbol> - </symbol>
@@ -276,23 +274,23 @@ public class CodeGeneratorTests
 				</term>
 		   </expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml1);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode.Should().Be(
-@"push local 1
+        vmCode.Should().Be(
+            @"push local 1
 neg");
-	}
+    }
 
-	[Fact]
-	public void CompileExpression_Op()
-	{
-		var source = @"
+    [Fact]
+    public void CompileExpression_Op()
+    {
+        var source = @"
 			class Main {
 				function void more() { 
 					var int i, j;      
@@ -302,11 +300,11 @@ neg");
 				}
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var expressionNodeXml1 = @"
+        var expressionNodeXml1 = @"
 			<expression>
 				<term>
 					<identifier> i </identifier>
@@ -317,20 +315,20 @@ neg");
 				</term>
 			</expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml1);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-@"push local 0
+        vmCode1.Should().Be(
+            @"push local 0
 push local 1
 or");
 
-		var expressionNodeXml2 = @"
+        var expressionNodeXml2 = @"
 			<expression>
 				<term>
 					<identifier> i </identifier>
@@ -341,18 +339,18 @@ or");
 				</term>
 			</expression>";
 
-		xmlDocument.LoadXml(expressionNodeXml2);
-		var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
-		vmCode2.Should().Be(
-@"push local 0
+        xmlDocument.LoadXml(expressionNodeXml2);
+        var vmCode2 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        vmCode2.Should().Be(
+            @"push local 0
 push local 1
 call Math.multiply 2");
-	}
+    }
 
-	[Fact]
-	public void CompileExpression_ExpressionListEmpty()
-	{
-		var source = @"
+    [Fact]
+    public void CompileExpression_ExpressionListEmpty()
+    {
+        var source = @"
 			class Cell 
 			{
 				field Array _neighbors;
@@ -376,11 +374,11 @@ call Math.multiply 2");
 				}
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var expressionNodeXml1 = @"
+        var expressionNodeXml1 = @"
 				<expression>
 					<term>
 					  <identifier> currentNeighbor </identifier>
@@ -393,23 +391,23 @@ call Math.multiply 2");
 					</term>
 				</expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml1);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-@"push local 0
+        vmCode1.Should().Be(
+            @"push local 0
 call Cell.getIsAlive 1");
-	}
+    }
 
-	[Fact]
-	public void CompileExpression_ExpressionList()
-	{
-		var source = @"
+    [Fact]
+    public void CompileExpression_ExpressionList()
+    {
+        var source = @"
 			class Cell 
 			{
 				method void determineNextLiveState()
@@ -423,11 +421,11 @@ call Cell.getIsAlive 1");
 				}
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var expressionNodeXml1 = @"
+        var expressionNodeXml1 = @"
 				<expression>
 					<term>
 					  <identifier> currentNeighbor </identifier>
@@ -451,25 +449,25 @@ call Cell.getIsAlive 1");
 					</term>
 				</expression>";
 
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(expressionNodeXml1);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(expressionNodeXml1);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileExpression(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-@"push local 0
+        vmCode1.Should().Be(
+            @"push local 0
 push constant 1
 push local 1
 call Cell.getIsAlive 3");
-	}
+    }
 
-	[Fact]
-	public void CompileLetStatements()
-	{
-		var source = @"
+    [Fact]
+    public void CompileLetStatements()
+    {
+        var source = @"
 			class Cell {
 			  method void determineNextLiveState() {
 				var Cell currentNeighbor;
@@ -480,11 +478,11 @@ call Cell.getIsAlive 3");
 			  }
 			}
 ";
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var statementNodeXml = @"
+        var statementNodeXml = @"
 		<statements>
 			<letStatement>
 			  <keyword> let </keyword>
@@ -510,25 +508,25 @@ call Cell.getIsAlive 3");
 			</letStatement>
 		</statements>
 ";
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(statementNodeXml);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-			@"push constant 0
+        vmCode1.Should().Be(
+            @"push constant 0
 pop local 1
 push constant 0
 pop local 2");
-	}
+    }
 
-	[Fact]
-	public void CompileWhileStatements()
-	{
-		var source = @"
+    [Fact]
+    public void CompileWhileStatements()
+    {
+        var source = @"
 			class Cell {
 			   method void determineNextLiveState() {
 				var int liveNeighbors, i;
@@ -543,11 +541,11 @@ pop local 2");
 			  }
 			}
 ";
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var statementNodeXml = @"
+        var statementNodeXml = @"
 		<statements>
 			<whileStatement>
 			  <keyword> while </keyword>
@@ -584,16 +582,16 @@ pop local 2");
 			</whileStatement>
 		</statements>
 ";
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(statementNodeXml);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-			@"label WHILE_EXP1
+        vmCode1.Should().Be(
+            @"label WHILE_EXP1
 push local 1
 push constant 8
 lt
@@ -605,12 +603,12 @@ add
 pop local 1
 goto WHILE_EXP1
 label WHILE_END1");
-	}
+    }
 
-	[Fact]
-	public void CompileIfStatements()
-	{
-		var source = @"
+    [Fact]
+    public void CompileIfStatements()
+    {
+        var source = @"
 			class Cell {
 			   method void determineNextLiveState() {
 				var int liveNeighbors, i;
@@ -630,11 +628,11 @@ label WHILE_END1");
 			  }
 			}
 ";
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var statementNodeXml = @"
+        var statementNodeXml = @"
 		<statements>
 			<ifStatement>
 			  <keyword> if </keyword>
@@ -691,16 +689,16 @@ label WHILE_END1");
 			</ifStatement>
 		</statements>
 ";
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(statementNodeXml);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-			@"push local 1
+        vmCode1.Should().Be(
+            @"push local 1
 push constant 8
 lt
 if-goto IF_TRUE1
@@ -717,12 +715,12 @@ push constant 1
 add
 pop local 1
 label IF_END1");
-	}
+    }
 
-	[Fact]
-	public void CompileDoStatements()
-	{
-		var source = @"
+    [Fact]
+    public void CompileDoStatements()
+    {
+        var source = @"
 			class Cell {
 			  field Array _neighbors;
 			  field Cell _cell;
@@ -734,11 +732,11 @@ label IF_END1");
 			  }
 			}
 ";
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
 
-		var statementNodeXml = @"
+        var statementNodeXml = @"
 		<statements>
 			<doStatement>
 			  <keyword> do </keyword>
@@ -774,28 +772,28 @@ label IF_END1");
 			</doStatement>
 		</statements>
 ";
-		var xmlDocument = new XmlDocument();
-		xmlDocument.LoadXml(statementNodeXml);
+        var xmlDocument = new XmlDocument();
+        xmlDocument.LoadXml(statementNodeXml);
 
-		var codeGenerator = new CodeGenerator(parseTree);
-		codeGenerator.CompileClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        codeGenerator.CompileClass();
 
-		var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
+        var vmCode1 = codeGenerator.CompileStatements(xmlDocument.FirstChild).Trim();
 
-		vmCode1.Should().Be(
-@"push this 0
+        vmCode1.Should().Be(
+            @"push this 0
 call Memory.deAlloc 1
 pop temp 0
 push this 1
 push constant 1
 call Cell.advance 2
 pop temp 0");
-	}
+    }
 
-	[Fact]
-	public void CompileSeven()
-	{
-		var source = @"
+    [Fact]
+    public void CompileSeven()
+    {
+        var source = @"
 			class Main {
 			   function void main() {
 				  do Output.printInt(1 + (2 * 3));
@@ -803,14 +801,14 @@ pop temp 0");
 			   }
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-@"function Main.main 0
+        vmCode.Should().Be(
+            @"function Main.main 0
 push constant 1
 push constant 2
 push constant 3
@@ -821,12 +819,12 @@ pop temp 0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileConvertToBin()
-	{
-		var source = @"
+    [Fact]
+    public void CompileConvertToBin()
+    {
+        var source = @"
 		   class Main {
 			function void main() {
 				var int value;
@@ -880,14 +878,14 @@ return
 			}
 		}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-@"function Main.main 1
+        vmCode.Should().Be(
+            @"function Main.main 1
 push constant 8001
 push constant 16
 push constant 1
@@ -997,12 +995,12 @@ label WHILE_END0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileAverage()
-	{
-		var source = @"
+    [Fact]
+    public void CompileAverage()
+    {
+        var source = @"
 			class Main {
 			   function void main() {
 				 var Array a; 
@@ -1025,14 +1023,14 @@ return
 			   }
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-@"function Main.main 4
+        vmCode.Should().Be(
+            @"function Main.main 4
 push constant 18
 call String.new 1
 push constant 72
@@ -1182,12 +1180,12 @@ pop temp 0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileSquareMain()
-	{
-		var source = @"
+    [Fact]
+    public void CompileSquareMain()
+    {
+        var source = @"
 			class Main {
 				function void main() {
 					var SquareGame game;
@@ -1198,14 +1196,14 @@ return
 				}
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Main.main 1
+        vmCode.Should().Be(
+            @"function Main.main 1
 call SquareGame.new 0
 pop local 0
 push local 0
@@ -1217,12 +1215,12 @@ pop temp 0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileSquareSquare()
-	{
-		var source = @"
+    [Fact]
+    public void CompileSquareSquare()
+    {
+        var source = @"
 			class Square {
 			   field int x, y; // screen location of the square's top-left corner
 			   field int size; // length of this square, in pixels
@@ -1325,14 +1323,14 @@ return
 			   }
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Square.new 0
+        vmCode.Should().Be(
+            @"function Square.new 0
 push constant 3
 call Memory.alloc 1
 pop pointer 0
@@ -1637,12 +1635,12 @@ label IF_FALSE0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileSquareSquareGame()
-	{
-		var source = @"
+    [Fact]
+    public void CompileSquareSquareGame()
+    {
+        var source = @"
 			class SquareGame {
    field Square square; // the square of this game
    field int direction; // the square's current direction: 
@@ -1704,14 +1702,14 @@ return
    }
 }";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function SquareGame.new 0
+        vmCode.Should().Be(
+            @"function SquareGame.new 0
 push constant 2
 call Memory.alloc 1
 pop pointer 0
@@ -1891,12 +1889,12 @@ label WHILE_END0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileComplexArrays()
-	{
-		var source = @"
+    [Fact]
+    public void CompileComplexArrays()
+    {
+        var source = @"
 			class Main {
 				function void main() {
 					var Array a, b, c;
@@ -1957,14 +1955,14 @@ return
 				}
 			}";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Main.main 3
+        vmCode.Should().Be(
+            @"function Main.main 3
 push constant 10
 call Array.new 1
 pop local 0
@@ -2667,12 +2665,12 @@ label WHILE_END0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompilePongBall()
-	{
-		var source = @"
+    [Fact]
+    public void CompilePongBall()
+    {
+        var source = @"
 			class Ball {
 
 				field int x, y;               // the ball's screen location (in pixels)
@@ -2868,14 +2866,14 @@ return
 			}
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Ball.new 0
+        vmCode.Should().Be(
+            @"function Ball.new 0
 push constant 15
 call Memory.alloc 1
 pop pointer 0
@@ -3320,12 +3318,12 @@ pop temp 0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompilePongGame()
-	{
-		var source = @"
+    [Fact]
+    public void CompilePongGame()
+    {
+        var source = @"
 			class PongGame {
 
 				static PongGame instance; // the singleton, a Pong game instance     
@@ -3457,14 +3455,14 @@ return
 			}
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function PongGame.new 0
+        vmCode.Should().Be(
+            @"function PongGame.new 0
 push constant 7
 call Memory.alloc 1
 pop pointer 0
@@ -3783,12 +3781,12 @@ label IF_FALSE0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompilePongBat()
-	{
-		var source = @"
+    [Fact]
+    public void CompilePongBat()
+    {
+        var source = @"
 			class Bat {
 
 				field int x, y;           // the bat's screen location
@@ -3879,14 +3877,14 @@ return
 			}
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Bat.new 0
+        vmCode.Should().Be(
+            @"function Bat.new 0
 push constant 5
 call Memory.alloc 1
 pop pointer 0
@@ -4094,12 +4092,12 @@ label IF_END0
 push constant 0
 return
 ");
-	}
+    }
 
-	[Fact]
-	public void CompileMath()
-	{
-		var source = @"
+    [Fact]
+    public void CompileMath()
+    {
+        var source = @"
 			// This file is part of www.nand2tetris.org
 			// and the book ""The Elements of Computing Systems""
 			// by Nisan and Schocken, MIT Press.
@@ -4297,14 +4295,14 @@ return
 
 			";
 
-		var parser = new Parser();
-		parser.GetTokens(source);
-		var parseTree = parser.ParseClass();
-		var codeGenerator = new CodeGenerator(parseTree);
-		var vmCode = codeGenerator.CompileClass();
+        var parser = new Parser();
+        parser.GetTokens(source);
+        var parseTree = parser.ParseClass();
+        var codeGenerator = new CodeGenerator(parseTree);
+        var vmCode = codeGenerator.CompileClass();
 
-		vmCode.Should().Be(
-			@"function Math.init 0
+        vmCode.Should().Be(
+            @"function Math.init 0
 push constant 16
 call Array.new 1
 pop static 0
@@ -4706,5 +4704,5 @@ label WHILE_END0
 push local 1
 return
 ");
-	}
+    }
 }
