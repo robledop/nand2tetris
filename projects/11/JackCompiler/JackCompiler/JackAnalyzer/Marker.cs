@@ -1,16 +1,8 @@
-﻿namespace JackCompiler.JackAnalyzer
-{
-    public struct Marker
-    {
-        public int Pointer { get; set; }
-        public int Line { get; set; }
-        public int Column { get; set; }
+﻿namespace JackCompiler.JackAnalyzer;
 
-        public Marker(int pointer, int line, int column)
-        {
-            Line = line;
-            Column = column;
-            Pointer = pointer;
-        }
-    }
+public struct Marker(int pointer, int line, int column)
+{
+    public int Pointer { get; set; } = pointer;
+    public int Line { get; set; } = line;
+    public int Column { get; set; } = column;
 }

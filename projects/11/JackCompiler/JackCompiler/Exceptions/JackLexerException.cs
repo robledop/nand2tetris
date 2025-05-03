@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace JackCompiler.Exceptions
+namespace JackCompiler.Exceptions;
+
+public class JackLexerException : Exception
 {
-    public class JackLexerException : Exception
+    public JackLexerException() : base()
     {
-        public JackLexerException() : base()
-        {
-        }
+    }
 
-        public JackLexerException(string message) : base(message)
-        {
-        }
+    public JackLexerException(string message) : base(message)
+    {
+    }
 
-        public JackLexerException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    public JackLexerException(string message, Exception innerException) : base(message, innerException)
+    {
     }
 }

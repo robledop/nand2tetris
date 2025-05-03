@@ -8,6 +8,7 @@ if (args.Length == 0)
     Console.WriteLine("Provide a source file or a directory");
     return;
 }
+
 var path = args[0];
 
 
